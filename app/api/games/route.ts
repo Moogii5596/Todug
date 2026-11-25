@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   const sb = createClient(url, anon, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
   const { data: user } = await sb.auth.getUser(auth.slice(7));
   if (!user.user) return Response.json({ error: "Нэвтэрнэ үү." }, { status: 401 });
-  const { data: c } = await sb.from("children").select("*").eq("id", body.childId).maybeSingle();
+  const { data: c } = await sb.from("todug_children").select("*").eq("id", body.childId).maybeSingle();
   if (!c) return Response.json({ error: "Хүүхдийн мэдээлэл олдсонгүй." }, { status: 404 });
 
   const likes = ((c.likes as string[]) ?? []).map(k => LIKES[k]?.label).filter(Boolean).join(", ") || "бөмбөг";

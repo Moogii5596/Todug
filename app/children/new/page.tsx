@@ -11,7 +11,7 @@ export default function NewChild() {
   const router = useRouter();
 
   async function create(p: Profile) {
-    const { data, error } = await getSupabase().from("children").insert(profileToRow(p)).select("id").single();
+    const { data, error } = await getSupabase().from("todug_children").insert(profileToRow(p)).select("id").single();
     if (error || !data) return "Хадгалж чадсангүй. Дахин оролдоно уу.";
     router.push("/children/" + data.id);
   }

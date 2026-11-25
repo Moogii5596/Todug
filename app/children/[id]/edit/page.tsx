@@ -16,14 +16,14 @@ export default function EditChild() {
 
   useEffect(() => {
     if (!ready) return;
-    getSupabase().from("children").select("*").eq("id", id).maybeSingle().then(({ data, error }) => {
+    getSupabase().from("todug_children").select("*").eq("id", id).maybeSingle().then(({ data, error }) => {
       if (error || !data) setErr("Энэ хүүхдийн мэдээлэл олдсонгүй.");
       else setProfile(rowToProfile(data as ChildRow));
     });
   }, [ready, id]);
 
   async function update(p: Profile) {
-    const { error } = await getSupabase().from("children").update(profileToRow(p)).eq("id", id);
+    const { error } = await getSupabase().from("todug_children").update(profileToRow(p)).eq("id", id);
     if (error) return "Хадгалж чадсангүй. Дахин оролдоно уу.";
     router.push("/children/" + id);
   }

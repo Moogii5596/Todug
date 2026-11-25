@@ -20,9 +20,9 @@ export default function Child() {
     if (!ready) return;
     const sb = getSupabase();
     (async () => {
-      const child = await sb.from("children").select("*").eq("id", id).maybeSingle();
+      const child = await sb.from("todug_children").select("*").eq("id", id).maybeSingle();
       if (child.error || !child.data) { setErr("Энэ хүүхдийн мэдээлэл олдсонгүй."); return; }
-      const prog = await sb.from("progress").select("week, day").eq("child_id", id);
+      const prog = await sb.from("todug_progress").select("week, day").eq("child_id", id);
       const map: Record<number, number[]> = {};
       (prog.data ?? []).forEach((r: { week: number; day: number }) => { (map[r.week] ||= []).push(r.day); });
       setDone(map);
@@ -36,14 +36,14 @@ export default function Child() {
     const next = { ...done, [week]: had ? done[week].filter(d => d !== day) : [...(done[week] ?? []), day] };
     setDone(next);
     const { error } = had
-      ? await sb.from("progress").delete().eq("child_id", id).eq("week", week).eq("day", day)
-      : await sb.from("progress").insert({ child_id: id, week, day });
+      ? await sb.from("todug_progress").delete().eq("child_id", id).eq("week", week).eq("day", day)
+      : await sb.from("todug_progress").insert({ child_id: id, week, day });
     if (error) { setDone(done); setErr("Тэмдэглэгээг хадгалж чадсангүй. Дахин оролдоно уу."); }
   }
 
   async function remove() {
     if (!window.confirm("Энэ хүүхдийн мэдээлэл, ахицыг бүр мөсөн устгах уу?")) return;
-    const { error } = await getSupabase().from("children").delete().eq("id", id);
+    const { error } = await getSupabase().from("todug_children").delete().eq("id", id);
     if (error) { setErr("Устгаж чадсангүй. Дахин оролдоно уу."); return; }
     router.push("/children");
   }

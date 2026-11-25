@@ -13,7 +13,7 @@ export default function Children() {
 
   useEffect(() => {
     if (!ready) return;
-    getSupabase().from("children").select("*").order("created_at").then(({ data, error }) => {
+    getSupabase().from("todug_children").select("*").order("created_at").then(({ data, error }) => {
       if (error) setErr("Жагсаалтыг ачаалж чадсангүй. Хуудсаа дахин ачаална уу.");
       setRows((data as ChildRow[]) ?? []);
     });
