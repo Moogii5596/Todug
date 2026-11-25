@@ -36,6 +36,13 @@ npm run dev
 
 Дараа нь http://localhost:3000 хаягийг нээнэ.
 
+## Google, Facebook-ээр нэвтрэх
+
+1. Supabase > Authentication > Providers хэсэгт Google, Facebook-ийг идэвхжүүлж, тус бүрийн Client ID, Secret-ийг оруулна.
+2. Google Cloud болон Meta for Developers дээр буцах хаягаар `https://ТӨСЛИЙН_ID.supabase.co/auth/v1/callback`-ийг бүртгэнэ.
+3. Supabase > Authentication > URL Configuration > Redirect URLs хэсэгт сайтын хаягаа `/**` төгсгөлтэй нэмнэ.
+4. `NEXT_PUBLIC_OAUTH_PROVIDERS=google,facebook` гэж тохируулаад дахин байршуулна.
+
 ## GitHub руу оруулах
 
 GitHub дээр `todug` нэртэй хоосон репозитор үүсгээд:

@@ -135,3 +135,8 @@ input:focus-visible, a:focus-visible { outline: 3px solid var(--yellow); outline
 .rowbtns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
 .danger { color: var(--red); border-color: var(--red); }
 h1.page { font-size: 26px; line-height: 1.2; margin: 0 0 14px; }
+
+/* Google, Facebook-ээр нэвтрэх */
+.social { color: var(--ink); border-color: var(--line); }
+.social.facebook { background: #1877F2; border-color: #1877F2; color: #fff; }
+.or { text-align: center; color: var(--muted); font-size: 14.5px; margin: 4px 0 0; }
