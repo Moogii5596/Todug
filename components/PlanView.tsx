@@ -1,11 +1,17 @@
 "use client";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LIKES, STAGES, UNITS, buildPlan, fill, type Like, type Profile, type Unit } from "@/lib/engine";
 import { ageText } from "@/lib/children";
 import { getSupabase } from "@/lib/supabase";
 
 type Game = { name: string; steps: string[]; say?: string };
-type Props = { profile: Profile; childId: string; done: Record<number, number[]>; onToggle: (week: number, day: number) => void };
+type Props = {
+  profile: Profile; childId: string;
+  done: Record<number, number[]>;   /* түлхүүр нь UNITS-ийн индекс */
+  onToggle: (unit: number, day: number) => void;
+  onAdvance: (delta: 4 | -4) => void;
+  onResetUnit: (unit: number) => void;
+};
 
 function Talk({ talk, v, childName }: { talk: string[][]; v: Like; childName: string }) {
   return (
@@ -46,36 +52,57 @@ function UnitBlock({ u, weekIdx, p }: { u: Unit; weekIdx: number; p: Profile }) 
   );
 }
 
-export default function PlanView({ profile: p, childId, done, onToggle }: Props) {
+export default function PlanView({ profile: p, childId, done, onToggle, onAdvance, onResetUnit }: Props) {
   const plan = useMemo(() => buildPlan(p), [p]);
-  const [week, setWeek] = useState<number | "x">(0);
-  const [games, setGames] = useState<Game[]>([]);
-  const [aiMsg, setAiMsg] = useState("");
+  /* Сонгосон таб нь аль 4 долоо хоногийн цонхонд хамаарахыг хамт хадгална: цонх солигдоход эхний таб руу буцна */
+  const [sel, setSel] = useState<{ adv: number; tab: number | "x" }>({ adv: plan.advance, tab: 0 });
+  const [ai, setAi] = useState<{ key: string; games: Game[]; msg: string } | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
+  const tabsRef = useRef<HTMLDivElement>(null);
+  const shownAdv = useRef(plan.advance);
+
+  useEffect(() => {
+    if (shownAdv.current === plan.advance) return;
+    shownAdv.current = plan.advance;
+    tabsRef.current?.scrollIntoView({ block: "start" });
+  }, [plan.advance]);
 
   const who = p.name || (p.sex === "boy" ? "Таны хүү" : "Таны охин");
   const per = p.time === 10 ? 10 : p.time / 2;
   const times = p.time === 10 ? 1 : 2;
-  const unit = week === "x" ? UNITS[plan.extra as number] : UNITS[plan.ids[week]];
-  const weekDone = week === "x" ? [] : done[week] ?? [];
+  let week: number | "x" = sel.adv === plan.advance ? sel.tab : 0;
+  if (week === "x" ? plan.extra == null : week >= plan.ids.length) week = 0;
+  const unitId = week === "x" ? (plan.extra as number) : plan.ids[week];
+  const unit = UNITS[unitId];
+  const weekDone = done[unitId] ?? [];
+  /* Зохиосон тоглоом зөвхөн хүссэн табдаа харагдана */
+  const aiKey = plan.advance + ":" + week;
+  const games = ai?.key === aiKey ? ai.games : [];
+  const aiMsg = ai?.key === aiKey ? ai.msg : "";
+  const tabId = (t: number | "x") => "plan-tab-" + t;
 
   async function makeGames() {
-    setAiBusy(true); setAiMsg("");
+    const key = aiKey;
+    setAiBusy(true); setAi(null);
     try {
       const { data } = await getSupabase().auth.getSession();
       const res = await fetch("/api/games", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: "Bearer " + (data.session?.access_token ?? "") },
-        body: JSON.stringify({ childId, goal: unit.goal }),
+        body: JSON.stringify({ childId, unit: unitId }),
       });
-      const json = await res.json();
+      const json = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(json.error || "error");
-      setGames(json.games);
+      setAi({ key, games: Array.isArray(json.games) ? json.games : [], msg: "" });
     } catch (e) {
-      setGames([]);
-      setAiMsg(e instanceof Error && e.message !== "error" ? e.message : "Тоглоом зохиож чадсангүй. Дахин оролдоно уу.");
+      setAi({ key, games: [], msg: e instanceof Error && e.message !== "error" ? e.message : "Тоглоом зохиож чадсангүй. Дахин оролдоно уу." });
     }
     setAiBusy(false);
+  }
+
+  function pick(tab: number | "x") {
+    setSel({ adv: plan.advance, tab });
+    setAi(null);
   }
 
   return (
@@ -86,7 +113,7 @@ export default function PlanView({ profile: p, childId, done, onToggle }: Props)
           <dt>Нас, хүйс</dt><dd>{ageText(p.years, p.months)}, {p.sex === "boy" ? "хүү" : "охин"}</dd>
           <dt>Одоо</dt><dd>{STAGES[p.stage]}</dd>
           <dt>Энэ насанд</dt><dd>Ихэнх хүүхэд {plan.exp.text}</dd>
-          <dt>Эхлэх шат</dt><dd>{UNITS[plan.ids[0]].title}</dd>
+          <dt>Эхлэх шат</dt><dd>{UNITS[plan.seq[0]].title}</dd>
         </dl>
       </div>
 
@@ -106,26 +133,52 @@ export default function PlanView({ profile: p, childId, done, onToggle }: Props)
         </p>
       </div>
 
-      <div className="tabs" role="tablist" style={{ gridTemplateColumns: `repeat(${plan.ids.length + (plan.extra != null ? 1 : 0)}, 1fr)` }}>
+      <div ref={tabsRef} className="tabs" role="tablist" style={{ gridTemplateColumns: `repeat(${plan.ids.length + (plan.extra != null ? 1 : 0)}, 1fr)` }}>
         {plan.ids.map((_, i) => (
-          <button key={i} role="tab" aria-selected={week === i} onClick={() => setWeek(i)}>{i + 1}-р долоо хоног</button>
+          <button key={i} id={tabId(i)} role="tab" aria-selected={week === i} aria-controls="plan-panel" onClick={() => pick(i)}>
+            {plan.advance + i + 1}-р долоо хоног
+          </button>
         ))}
-        {plan.extra != null && <button role="tab" aria-selected={week === "x"} onClick={() => setWeek("x")}>Нэмэлт</button>}
+        {plan.extra != null && (
+          <button id={tabId("x")} role="tab" aria-selected={week === "x"} aria-controls="plan-panel" onClick={() => pick("x")}>Нэмэлт</button>
+        )}
       </div>
 
-      <UnitBlock u={unit} weekIdx={week === "x" ? 0 : week} p={p} />
+      <div id="plan-panel" role="tabpanel" aria-labelledby={tabId(week)}>
+        <UnitBlock u={unit} weekIdx={week === "x" ? 0 : plan.advance + week} p={p} />
 
-      {week !== "x" && (
-        <div className="card">
-          <h3 className="round">Хийсэн өдрөө тэмдэглэ</h3>
-          <p className="muted">{weekDone.length} / 7 өдөр. Зорилго биелээгүй бол энэ долоо хоногоо давтана.</p>
-          <div className="days">
-            {[1, 2, 3, 4, 5, 6, 7].map(d => (
-              <button key={d} aria-pressed={weekDone.includes(d)} aria-label={d + "-р өдөр"} onClick={() => onToggle(week, d)}>{d}</button>
-            ))}
+        {week !== "x" && (
+          <div className="card">
+            <h3 className="round">Хийсэн өдрөө тэмдэглэ</h3>
+            <p className="muted">{weekDone.length} / 7 өдөр. Зорилго биелээгүй бол энэ долоо хоногоо давтана.</p>
+            <div className="days">
+              {[1, 2, 3, 4, 5, 6, 7].map(d => (
+                <button key={d} aria-pressed={weekDone.includes(d)} aria-label={d + "-р өдөр"} onClick={() => onToggle(unitId, d)}>{d}</button>
+              ))}
+            </div>
+            {weekDone.length > 0 && (
+              <button className="link" style={{ marginTop: 10, padding: 0 }} onClick={() => onResetUnit(unitId)}>
+                Энэ долоо хоногийг дахин эхлүүлэх
+              </button>
+            )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
+
+      <div className="card">
+        <h3 className="round">Цааш үргэлжлүүлэх</h3>
+        {plan.hasNext ? (
+          <>
+            <p className="muted">Долоо хоног бүрийн зорилго биелсэн бол дараагийн шат руу шилжээрэй. Яарах хэрэггүй, хүүхдийнхээ хэмнэлээр явна.</p>
+            <button className="cta" style={{ marginTop: 12 }} onClick={() => onAdvance(4)}>Дараагийн 4 долоо хоног руу шилжих</button>
+          </>
+        ) : (
+          <p className="muted">Эдгээр нь хөтөлбөрийн сүүлийн шатууд. Зорилго бүрэн биелтэл долоо хоногуудаа хэрэгцээгээрээ давтаарай.</p>
+        )}
+        {plan.hasPrev && (
+          <button className="ghost" style={{ marginTop: 12 }} onClick={() => onAdvance(-4)}>Өмнөх 4 долоо хоног руу буцах</button>
+        )}
+      </div>
 
       <div className="card">
         <h3 className="round">Нэмэлт тоглоом</h3>
@@ -134,10 +187,10 @@ export default function PlanView({ profile: p, childId, done, onToggle }: Props)
           {aiBusy ? "Зохиож байна…" : games.length ? "Өөр тоглоом зохиолгох" : "Шинэ тоглоом зохиолгох"}
         </button>
         {aiMsg && <p className="err" style={{ marginTop: 12 }}>{aiMsg}</p>}
-        {games.map(g => (
-          <div className="card lesson" key={g.name} style={{ background: "var(--bg)", marginTop: 12 }}>
+        {games.map((g, gi) => (
+          <div className="card lesson" key={gi} style={{ background: "var(--bg)", marginTop: 12 }}>
             <h3 className="round">{g.name}</h3>
-            <ul className="steps">{(g.steps || []).map(s => <li key={s}>{s}</li>)}</ul>
+            <ul className="steps">{(g.steps || []).map((s, si) => <li key={si}>{s}</li>)}</ul>
             {g.say && <div className="talk" style={{ background: "var(--surface)" }}><div className="say p">{g.say}</div></div>}
           </div>
         ))}

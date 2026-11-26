@@ -18,6 +18,7 @@ export default function Header() {
         {!loading && session && (
           <>
             <Link href="/children" className="link">Хүүхдүүд</Link>
+            <Link href="/account" className="link">Бүртгэл</Link>
             <button className="link" onClick={signOut}>Гарах</button>
           </>
         )}

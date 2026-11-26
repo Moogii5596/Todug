@@ -21,6 +21,7 @@ export default function Home() {
 
       <Link href="/children" className="cta">Хичээл боловсруулах</Link>
       <p className="foot">Todug онош тавихгүй. Гэрийн дасгал нь хэл засалч, эмчийн үзлэгийг орлохгүй.</p>
+      <p className="foot" style={{ marginTop: 6 }}><Link href="/privacy">Нууцлалын бодлого</Link></p>
     </main>
   );
 }

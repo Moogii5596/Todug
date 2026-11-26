@@ -72,6 +72,7 @@ input[type=text], select {
   background: var(--blue); color: var(--blue-ink); font: inherit; font-weight: 700; font-size: 18px;
 }
 .err { color: var(--red); font-size: 15px; margin: 0 0 10px; }
+.ok { color: var(--green); font-size: 15px; margin: 0 0 10px; }
 
 /* үр дүн */
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 14px; }
@@ -117,7 +118,8 @@ ol.routine li, ul.steps li { margin: 3px 0; }
 
 /* ===== платформын нэмэлт ===== */
 a { color: var(--blue); }
-header.top nav { display: flex; gap: 4px; align-items: center; }
+header.top { gap: 8px; }
+header.top nav { display: flex; gap: 2px; align-items: center; white-space: nowrap; }
 header.top a.brand { text-decoration: none; color: var(--ink); }
 .link { text-decoration: none; display: inline-block; }
 a.cta, a.ghost { display: flex; align-items: center; justify-content: center; text-decoration: none; }
@@ -140,3 +142,10 @@ h1.page { font-size: 26px; line-height: 1.2; margin: 0 0 14px; }
 .social { color: var(--ink); border-color: var(--line); }
 .social.facebook { background: #1877F2; border-color: #1877F2; color: #fff; }
 .or { text-align: center; color: var(--muted); font-size: 14.5px; margin: 4px 0 0; }
+
+/* бүртгэл, нууцлалын хуудас */
+.doc h2 { font-size: 18px; line-height: 1.3; margin: 20px 0 6px; }
+.doc p { margin: 0 0 10px; }
+.doc ul { margin: 0 0 10px; padding-left: 22px; }
+.doc li { margin: 4px 0; }
+.ghost.danger:disabled { opacity: .6; }
