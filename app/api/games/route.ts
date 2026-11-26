@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { LIKES, STAGES, UNITS } from "@/lib/engine";
 import { ageFromBirth } from "@/lib/children";
+import { SCHEMA } from "@/lib/supabase";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DAILY_LIMIT = 10;
@@ -78,7 +79,7 @@ export async function POST(request: Request) {
   const unit = UNITS[unitIdx];
 
   // Хэрэглэгчийн токеноор уншина: RLS нь зөвхөн өөрийн хүүхдийг буцаана
-  const sb = createClient(url, anon, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
+  const sb = createClient(url, anon, { global: { headers: { Authorization: auth } }, auth: { persistSession: false }, db: { schema: SCHEMA } });
   const { data: user } = await sb.auth.getUser(auth.slice(7));
   if (!user.user) return Response.json({ error: "Нэвтэрнэ үү." }, { status: 401 });
   const { data: c } = await sb.from("todug_children").select("*").eq("id", childId).maybeSingle();
