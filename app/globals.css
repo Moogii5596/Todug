@@ -123,7 +123,7 @@ header.top nav { display: flex; gap: 2px; align-items: center; white-space: nowr
 header.top a.brand { text-decoration: none; color: var(--ink); }
 .link { text-decoration: none; display: inline-block; }
 a.cta, a.ghost { display: flex; align-items: center; justify-content: center; text-decoration: none; }
-input[type=email], input[type=password] {
+input[type=email], input[type=password], input[type=search] {
   width: 100%; margin-top: 4px; min-height: 48px; padding: 0 12px;
   font: inherit; color: var(--ink); background: var(--surface);
   border: 1.5px solid var(--line); border-radius: 12px;

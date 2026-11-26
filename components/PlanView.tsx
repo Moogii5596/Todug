@@ -207,9 +207,9 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
         {loaded?.err && <p className="err" role="alert">{loaded.err}</p>}
         {loaded && !loaded.err && (loaded.units[unitId]
           ? <UnitBlock u={loaded.units[unitId]} weekIdx={week === "x" ? 0 : plan.advance + week} p={p} />
-          : <Paywall what="Энэ долоо хоногийн хичээл" freeUsed={loaded.freeUsed} />)}
+          : <Paywall what={week === "x" ? "Нэмэлт хичээл" : "Энэ долоо хоногийн хичээл"} freeUsed={loaded.freeUsed} />)}
 
-        {week !== "x" && (
+        {week !== "x" && !!loaded?.units[unitId] && (
           <div className="card">
             <h3 className="round">Хийсэн өдрөө тэмдэглэ</h3>
             <p className="muted">{weekDone.length} / 7 өдөр. Зорилго биелээгүй бол энэ долоо хоногоо давтана.</p>
