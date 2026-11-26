@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Нууцлалын бодлого | Todug" };
+export const metadata: Metadata = {
+  title: "Нууцлалын бодлого",
+  description: "Todug таны болон хүүхдийн тань ямар мэдээллийг хадгалж, юунд ашигладаг тухай.",
+  alternates: { canonical: "/privacy" },
+};
 
 export default function Privacy() {
   return (
