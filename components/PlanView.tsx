@@ -91,7 +91,10 @@ function UnitBlock({ u, unitId, weekIdx, p, childId, access, weekDone, trackable
         <div className="use">Энэ долоо хоногийн арга</div>
         <Head icon="bulb">{u.strategy.name}</Head>
         <p className="muted">{u.why}</p>
-        <ul className="steps">{u.strategy.how.map(s => <li key={s}>{s}</li>)}</ul>
+        <ul className="dolist">
+          {u.strategy.how.map(s => <li key={s}><span className="mk yes"><Icon name="check" size={14} /></span>{s}</li>)}
+          {u.avoid.map(s => <li key={s}><span className="mk nope"><Icon name="no" size={14} /></span>{s}</li>)}
+        </ul>
         <div className="use" style={{ marginTop: 12 }}>Энэ долоо хоногт олон давтах үг, хэллэг</div>
         <div className="words">{words.map(w => <span key={w}>{w}</span>)}</div>
       </div>
@@ -110,15 +113,30 @@ function UnitBlock({ u, unitId, weekIdx, p, childId, access, weekDone, trackable
         <div className="week7" role="group" aria-label="Өдөр сонгох">
           {[1, 2, 3, 4, 5, 6, 7].map(d => (
             <button key={d} aria-pressed={weekDone.includes(d)} aria-current={d === day ? "true" : undefined}
-              aria-label={d + "-р өдөр" + (weekDone.includes(d) ? ", хийсэн" : "")} onClick={() => setPicked(d)}>
-              {weekDone.includes(d) ? <Icon name="check" size={18} /> : d}
+              aria-label={d + "-р өдөр, " + ROUTINES[u.days[d - 1].routine] + (weekDone.includes(d) ? ", хийсэн" : "")} onClick={() => setPicked(d)}>
+              {weekDone.includes(d) ? <Icon name="check" size={18} /> : <Icon name={u.days[d - 1].routine} size={18} />}
+              <small>{d}</small>
             </button>
           ))}
         </div>
         <div className="daycard">
-          <div className="use">{day}-р өдөр · {ROUTINES[tip.routine]} · {p.time} минут орчим</div>
-          <p>{fill(tip.todo, v)}</p>
+          <div className="dayhead">
+            <span className="badge big"><Icon name={tip.routine} size={24} /></span>
+            <div>
+              <div className="use">{day}-р өдөр · {ROUTINES[tip.routine]} · {p.time} минут орчим</div>
+              <h4 className="round">{fill(tip.title, v)}</h4>
+            </div>
+          </div>
+          <p className="need"><b>Хэрэгтэй зүйл:</b> {fill(tip.need, v)}</p>
+          <ol className="numsteps">{tip.steps.map(s => <li key={s}>{fill(s, v)}</li>)}</ol>
+          <div className="use" style={{ marginTop: 14 }}>Ингэж ярина</div>
           <Talk talk={tip.talk} v={v} childName={p.name || "Хүүхэд"} />
+          <div className="use" style={{ marginTop: 14 }}>Хүүхэд ингэвэл</div>
+          <div className="ifs">
+            {tip.ifs.map(f => (
+              <div key={f.when}><b>{fill(f.when, v)}</b><span>{fill(f.then, v)}</span></div>
+            ))}
+          </div>
           {trackable && (
             <button className={isDone ? "ghost" : "cta"} style={{ marginTop: 14 }} onClick={() => { setPicked(day); onToggle(unitId, day); }}>
               {isDone ? "Хийгээгүй болгох" : <><Icon name="check" size={18} /> {day}-р өдрийг хийлээ</>}

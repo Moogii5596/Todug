@@ -408,3 +408,26 @@ dialog.dialog .rowbtns { margin-top: 18px; }
 .doc .linklist li { margin: 0; }
 .child .muted { display: block; line-height: 1.35; margin-top: 3px; }
 @media (prefers-color-scheme: dark) { .tabs button[aria-selected=true] { background: var(--line-strong); } }
+
+/* Өдрийн бүрэн хичээл */
+.week7 button { grid-template-rows: auto auto; align-content: center; gap: 1px; }
+.week7 button small { font-size: 11px; font-weight: 700; line-height: 1; opacity: .75; }
+.dayhead { display: flex; align-items: center; gap: 12px; }
+.dayhead .use { margin-bottom: 2px; }
+.dayhead h4 { margin: 0; font-size: 19px; line-height: 1.25; }
+.badge.big { width: 46px; height: 46px; border-radius: 14px; }
+.daycard > p.need { margin: 12px 0 0; font-size: 15.5px; }
+ol.numsteps { list-style: none; counter-reset: step; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+ol.numsteps li { counter-increment: step; display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 10px; align-items: start; }
+ol.numsteps li::before {
+  content: counter(step); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--blue-soft); color: var(--link); font-family: var(--round); font-weight: 700; font-size: 15px;
+}
+.ifs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+.ifs > div { background: var(--bg); border-radius: var(--r-m); padding: 10px 12px; font-size: 15px; }
+.ifs b { display: block; margin-bottom: 3px; }
+ul.dolist { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+ul.dolist li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 10px; align-items: start; }
+.mk { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; margin-top: 2px; }
+.mk.yes { background: var(--green-soft); color: var(--green); }
+.mk.nope { background: var(--red-soft); color: var(--red); }

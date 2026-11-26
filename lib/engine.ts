@@ -9,14 +9,18 @@ export type Profile = {
 export type Like = { label: string; n: string; n2: string; v: string; vp: string; snd: string; s3: string };
 export type Unit = { title: string; goal: string };
 export type RoutineKey = "meal" | "bath" | "dress" | "play" | "out" | "book" | "bed";
-/* Нэг өдрийн бичил хувилбар: аль хэвшилд, юу хийх, ярианы богино жишээ (p = эцэг эх, c = хүүхэд, a = үйлдэл, w = хүлээх) */
-export type DayTip = { routine: RoutineKey; todo: string; talk: string[][] };
+/* Нэг өдрийн хичээл: аль хэвшилд, нэр, хэрэгтэй зүйл, гурван тодорхой алхам, ярианы жишээ
+   (p = эцэг эх, c = хүүхэд, a = үйлдэл, w = хүлээх), хүүхэд янз бүрээр хариулахад юу хийх (ifs) */
+export type DayTip = {
+  routine: RoutineKey; title: string; need: string; steps: string[]; talk: string[][];
+  ifs: { when: string; then: string }[];
+};
 /* Долоо хоног = нэг шат = нэг арга. why: яагаад; strategy: долоо хоногийн ганц арга; words: санал болгох зорилтот үг;
-   days: 7 өдрийн хувилбар; cheer: урам ба дараагийн алхам; signs: дараагийн шат руу шилжихэд бэлэн болсны шинж;
+   avoid: энэ шатанд хийхгүй зүйл; days: 7 өдрийн хичээл; cheer: урам ба дараагийн алхам; signs: дараагийн шат руу шилжихэд бэлэн болсны шинж;
    stuck: ахиц удаан үед; refer: мэргэжилтэнд хандах дохио.
-   Орлуулагч ({n}, {v} гэх мэт) зөвхөн words, todo, talk-д байж болно. */
+   Орлуулагч ({n}, {v} гэх мэт) зөвхөн words болон days доторх бичвэрт байж болно. */
 export type UnitContent = {
-  note?: string; why: string; strategy: { name: string; how: string[] }; words: string[];
+  note?: string; why: string; strategy: { name: string; how: string[] }; avoid: string[]; words: string[];
   days: DayTip[]; cheer: string; signs: string[]; stuck: string; refer: string[];
 };
 export type Alert = { lvl: "red" | "amber"; t: string; d: string };
@@ -43,7 +47,7 @@ export const FLAGS: Record<string, string> = {
 };
 export const LIKES: Record<string, Like> = {
   car:    { label: "Машин", n: "машин", n2: "дугуй", v: "яв", vp: "явлаа", snd: "ту-ту", s3: "Аав машин барина" },
-  animal: { label: "Амьтан", n: "нохой", n2: "муур", v: "гүй", vp: "гүйлээ", snd: "гав гав", s3: "Нохой хурдан гүйнэ" },
+  animal: { label: "Амьтан", n: "нохой", n2: "муур", v: "гүй", vp: "гүйлээ", snd: "хав хав", s3: "Нохой хурдан гүйнэ" },
   ball:   { label: "Бөмбөг", n: "бөмбөг", n2: "сагс", v: "шид", vp: "өнхөрлөө", snd: "бүм бүм", s3: "Би бөмбөг шиднэ" },
   food:   { label: "Хоол, жимс", n: "алим", n2: "банана", v: "ид", vp: "уналаа", snd: "ням ням", s3: "Би алим иднэ" },
   doll:   { label: "Хүүхэлдэй, баавгай", n: "баавгай", n2: "хүүхэлдэй", v: "унт", vp: "унтлаа", snd: "ш-ш-ш", s3: "Баавгай орондоо унтана" },
