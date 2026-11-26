@@ -15,7 +15,7 @@ function Opt(props: { type: "radio" | "checkbox"; name: string; label: string; c
 
 export default function ChildForm({ initial, submitLabel, onSubmit }: Props) {
   const [name, setName] = useState(initial?.name ?? "");
-  const [years, setYears] = useState(initial?.years ?? 3);
+  const [years, setYears] = useState(Math.min(12, Math.max(1, initial?.years ?? 3)));
   const [months, setMonths] = useState(initial?.months ?? 0);
   const [sex, setSex] = useState<Profile["sex"] | "">(initial?.sex ?? "");
   const [stage, setStage] = useState<number | null>(initial?.stage ?? null);
@@ -37,6 +37,7 @@ export default function ChildForm({ initial, submitLabel, onSubmit }: Props) {
     const res = await onSubmit({
       name: name.trim(), years, months, sex, stage, comp, flags,
       likes: likes.length ? likes : ["ball", "food"], time,
+      advance: initial?.advance ?? 0,
     });
     setBusy(false);
     if (res) setErr(res);
@@ -53,7 +54,7 @@ export default function ChildForm({ initial, submitLabel, onSubmit }: Props) {
         <div className="grid2" style={{ marginTop: 10 }}>
           <label className="f">Нас
             <select value={years} onChange={e => setYears(+e.target.value)}>
-              {[1, 2, 3, 4, 5, 6, 7].map(y => <option key={y} value={y}>{y} нас</option>)}
+              {Array.from({ length: 12 }, (_, i) => i + 1).map(y => <option key={y} value={y}>{y} нас</option>)}
             </select>
           </label>
           <label className="f">Сар

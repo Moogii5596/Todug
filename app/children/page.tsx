@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { STAGES } from "@/lib/engine";
-import { ageText, type ChildRow } from "@/lib/children";
+import { ageFromBirth, ageText, type ChildRow } from "@/lib/children";
 import { getSupabase } from "@/lib/supabase";
 import { useRequireAuth } from "@/lib/useRequireAuth";
 
@@ -28,15 +28,18 @@ export default function Children() {
       {rows.length === 0 && !err && (
         <p className="muted" style={{ marginBottom: 14 }}>Одоогоор хүүхэд нэмээгүй байна. Эхний хүүхдээ нэмээд хичээлийг нь аваарай.</p>
       )}
-      {rows.map(r => (
+      {rows.map(r => {
+        const age = ageFromBirth(r.birth_month);
+        return (
         <Link key={r.id} href={"/children/" + r.id} className="card child">
           <span>
             <b className="round">{r.name || (r.sex === "boy" ? "Хүү" : "Охин")}</b><br />
-            <span className="muted">{ageText(r.years, r.months)}. {STAGES[r.stage]}</span>
+            <span className="muted">{ageText(age.years, age.months)}. {STAGES[r.stage]}</span>
           </span>
           <span aria-hidden="true">›</span>
         </Link>
-      ))}
+        );
+      })}
       <Link href="/children/new" className="cta">Хүүхэд нэмэх</Link>
     </main>
   );

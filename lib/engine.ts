@@ -5,6 +5,7 @@ export type Profile = {
   name: string; years: number; months: number; sex: "boy" | "girl";
   stage: number; comp: "yes" | "some" | "no";
   flags: string[]; likes: string[]; time: number;
+  advance: number;   /* дарааллын хэдэн долоо хоногийг аль хэдийн давсан */
 };
 export type Like = { label: string; n: string; n2: string; v: string; vp: string; snd: string; s3: string };
 export type Lesson = { name: string; steps: string[]; talk: string[][] };
@@ -17,7 +18,8 @@ export const STAGES = [
   "Цөөн үг хэлдэг (10 хүртэл)",
   "Олон үг хэлдэг ч хооронд нь холбодоггүй",
   "2 үг холбож хэлдэг",
-  "Өгүүлбэрээр ярьдаг ч дутуу, ойлгомжгүй"
+  "Өгүүлбэрээр ярьдаг ч дутуу, ойлгомжгүй",
+  "Насандаа тохирсон, чөлөөтэй ярьдаг"
 ];
 export const COMP: Record<string, string> = { yes: "Тийм", some: "Заримдаа", no: "Үгүй" };
 export const FLAGS: Record<string, string> = {
@@ -199,7 +201,7 @@ export const UNITS: Unit[] = [
         talk: [["p","<mark>Ма-шин.</mark>"],["a","Үе бүрд алга ташина"],["c","Ма-шин"],["p","Машин! Сайн хэллээ."]] }
     ] }
 ];
-const START = [0, 2, 4, 6, 7];   /* ярианы түвшин бүрийн эхлэх шат */
+const START = [0, 2, 4, 6, 7, 7];   /* ярианы түвшин бүрийн эхлэх шат */
 
 /* ============ Логик ============ */
 function expected(m: number) {
@@ -207,7 +209,7 @@ function expected(m: number) {
   if (m < 24) return { s: 1, text: "анхны үгсээ хэлж, үгийн сан нь нэмэгддэг" };
   if (m < 36) return { s: 3, text: "50 орчим үгтэй болж, 2 үг холбож хэлдэг" };
   if (m < 48) return { s: 4, text: "3 ба түүнээс олон үгтэй өгүүлбэрээр ярьдаг" };
-  return { s: 4, text: "4–5 үгтэй өгүүлбэрээр, болсон явдлыг ярьдаг" };
+  return { s: 5, text: "4–5 үгтэй өгүүлбэрээр, болсон явдлыг ярьдаг" };
 }
 
 export function buildPlan(p: Profile) {
@@ -218,8 +220,14 @@ export function buildPlan(p: Profile) {
   const needBase = p.comp === "no" || social > 0;
 
   const start = START[p.stage];
-  let ids = [start, start + 1, start + 2, start + 3];
-  if (needBase && start > 0) ids = [0, start, start + 1, start + 2];
+  const last = UNITS.length - 1;
+  const seq: number[] = needBase && start > 0 ? [0] : [];
+  for (let i = start; i <= last; i++) seq.push(i);
+  const raw = Math.floor(Number(p.advance));
+  const advance = Number.isFinite(raw) ? Math.min(Math.max(raw, 0), seq.length - 1) : 0;
+  const ids = seq.slice(advance, advance + 4);
+  const hasNext = advance + 4 < seq.length;
+  const hasPrev = advance > 0;
   const extra: number | null = p.flags.includes("sounds") && !ids.includes(10) ? 10 : null;
 
   const alerts: Alert[] = [];
@@ -229,10 +237,12 @@ export function buildPlan(p: Profile) {
     d: "Нэрээр дуудахад харахгүй байх, заахгүй байх, харц бага тулгах нь яриа төдийгүй харилцааны хөгжлийг үнэлүүлэх шаардлагатайг илтгэнэ. Хүүхдийн хөгжлийн эсвэл мэдрэлийн эмчид хандана уу." });
   if (p.flags.includes("hearing") || (p.comp === "no" && m >= 18)) alerts.push({ lvl: "red", t: "Сонсгол шалгуулаарай",
     d: "Чих хамар хоолойн эмчид үзүүлж, сонсголын шинжилгээ хийлгэнэ үү. Бага зэргийн сонсгол бууралт ч яриаг саатуулдаг." });
-  if (gap >= 2 && m >= 24) alerts.push({ lvl: "red", t: "Хэл засалчид үзүүлээрэй",
+  if ((gap >= 2 && m >= 24) || (gap >= 1 && m >= 60)) alerts.push({ lvl: "red", t: "Хэл засалчид үзүүлээрэй",
     d: "Яриа нь насны түвшнээс нэлээд хоцорч байна. Гэрийн дасгалтай зэрэгцээд хэл засалч, хүүхдийн эмчийн үнэлгээ хэрэгтэй. Хүлээх тусам цаг алдана." });
   else if (gap === 1 && m >= 24) alerts.push({ lvl: "amber", t: "Ахицыг нь ажиглаарай",
     d: "Насны түвшнээс бага зэрэг хоцорч байж болзошгүй. Дасгалаа тогтмол хийж, 2–3 сарын дотор ахиц бага бол хэл засалчид үзүүлээрэй." });
+  if (p.comp === "some" && m >= 24) alerts.push({ lvl: "amber", t: "Ойлголтыг нь ажиглаарай",
+    d: "Хэлснийг тань заримдаа л ойлгож байна. Нэг алхамтай богино даалгавар өгч (\"Бөмбөг ав\"), 1–2 сар ажиглаарай. Ойлголт нь сайжрахгүй бол сонсголыг нь шалгуулж, хэл засалчид үзүүлнэ үү." });
   if (p.flags.includes("stutter")) alerts.push({ lvl: "amber", t: "Гацахад нь тайван хандаарай",
     d: "Үгийг нь дуусгаж өгөхгүй, \"удаан хэл\" гэж сануулахгүй, өөрөө удаан тайван ярина. Хэдэн сар үргэлжилбэл эсвэл хүүхэд өөрөө бухимдаж байвал хэл засалчид үзүүлнэ үү." });
   if (p.flags.includes("screen")) alerts.push({ lvl: "amber", t: "Дэлгэцийн цагийг багасгаарай",
@@ -243,7 +253,7 @@ export function buildPlan(p: Profile) {
   else if (gap === 1) verdict = "Яриа нь насны түвшнээс бага зэрэг хоцорч байж болзошгүй.";
   else verdict = "Яриа нь насны түвшнээс нэлээд хоцорч байна.";
 
-  return { months: m, exp, gap, ids, extra, alerts, verdict, needBase };
+  return { months: m, exp, gap, seq, ids, advance, hasNext, hasPrev, extra, alerts, verdict, needBase };
 }
 
 function cap(s: string) { return s.charAt(0).toUpperCase() + s.slice(1); }

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import ChildForm from "@/components/ChildForm";
 import { profileToRow, rowToProfile, type ChildRow } from "@/lib/children";
-import type { Profile } from "@/lib/engine";
+import { buildPlan, type Profile } from "@/lib/engine";
 import { getSupabase } from "@/lib/supabase";
 import { useRequireAuth } from "@/lib/useRequireAuth";
 
@@ -23,7 +23,12 @@ export default function EditChild() {
   }, [ready, id]);
 
   async function update(p: Profile) {
-    const { error } = await getSupabase().from("todug_children").update(profileToRow(p)).eq("id", id);
+    /* Хичээлийн дараалал өөрчлөгдвөл эхнээс нь, эс бөгөөс хүрсэн газраас нь үргэлжлүүлнэ */
+    const before = profile ? buildPlan({ ...profile, advance: 0 }).seq : [];
+    const after = buildPlan({ ...p, advance: 0 }).seq;
+    const same = before.length === after.length && before.every((u, i) => u === after[i]);
+    const advance = same ? profile?.advance ?? 0 : 0;
+    const { error } = await getSupabase().from("todug_children").update(profileToRow({ ...p, advance })).eq("id", id);
     if (error) return "Хадгалж чадсангүй. Дахин оролдоно уу.";
     router.push("/children/" + id);
   }
