@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import PasswordField from "@/components/PasswordField";
 import { getSupabase } from "@/lib/supabase";
 import { useSession } from "@/lib/useSession";
 
@@ -58,7 +59,7 @@ export default function Reset() {
   const pending = loading || (!session && hadToken && !waited);
 
   return (
-    <main>
+    <main className="auth">
       <h1 className="page round">Шинэ нууц үг</h1>
       {done ? (
         <>
@@ -73,17 +74,11 @@ export default function Reset() {
           <Link href="/login" className="link">Нэвтрэх хуудас руу буцах</Link>
         </>
       ) : (
-        <form onSubmit={submit} className="stack">
-          <label className="f">Шинэ нууц үг
-            <input type="password" required minLength={6} autoComplete="new-password"
-              value={password} onChange={e => setPassword(e.target.value)} />
-          </label>
-          <label className="f">Шинэ нууц үгээ давтана уу
-            <input type="password" required minLength={6} autoComplete="new-password"
-              value={repeat} onChange={e => setRepeat(e.target.value)} />
-          </label>
+        <form onSubmit={submit} className="card stack">
+          <PasswordField label="Шинэ нууц үг" value={password} onChange={setPassword} autoComplete="new-password" minLength={6} hint="6-аас дээш тэмдэгт." />
+          <PasswordField label="Шинэ нууц үгээ давтана уу" value={repeat} onChange={setRepeat} autoComplete="new-password" minLength={6} />
           {msg && <p className="err" role="alert">{msg}</p>}
-          <button className="cta" disabled={busy}>{busy ? "Түр хүлээнэ үү…" : "Нууц үг солих"}</button>
+          <button className="cta" disabled={busy}>{busy && <span className="spin" />}{busy ? "Түр хүлээнэ үү…" : "Нууц үг солих"}</button>
         </form>
       )}
     </main>

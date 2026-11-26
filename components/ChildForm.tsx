@@ -112,8 +112,10 @@ export default function ChildForm({ initial, submitLabel, onSubmit }: Props) {
         </div>
       </fieldset>
 
-      {err && <p className="err" role="alert">{err}</p>}
-      <button className="cta" onClick={submit} disabled={busy}>{busy ? "Хадгалж байна…" : submitLabel}</button>
+      <div className="formbar">
+        {err && <p className="err" role="alert">{err}</p>}
+        <button className="cta" onClick={submit} disabled={busy}>{busy && <span className="spin" />}{busy ? "Хадгалж байна…" : submitLabel}</button>
+      </div>
     </div>
   );
 }

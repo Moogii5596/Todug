@@ -1,7 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
 import ChildForm from "@/components/ChildForm";
+import Icon from "@/components/Icon";
+import Loading from "@/components/Loading";
 import { profileToRow, rowToProfile, type ChildRow } from "@/lib/children";
 import { buildPlan, type Profile } from "@/lib/engine";
 import { getSupabase } from "@/lib/supabase";
@@ -34,9 +37,10 @@ export default function EditChild() {
   }
 
   if (err) return <main><p className="err" role="alert">{err}</p></main>;
-  if (!ready || !profile) return <main><p className="muted">Ачаалж байна…</p></main>;
+  if (!ready || !profile) return <Loading />;
   return (
     <main>
+      <Link href={"/children/" + id} className="link subtle back"><Icon name="back" size={18} /> Буцах</Link>
       <h1 className="page round">Мэдээлэл засах</h1>
       <ChildForm initial={profile} submitLabel="Хадгалах" onSubmit={update} />
     </main>

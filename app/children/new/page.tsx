@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import ChildForm from "@/components/ChildForm";
+import Loading from "@/components/Loading";
 import { profileToRow } from "@/lib/children";
 import type { Profile } from "@/lib/engine";
 import { getSupabase } from "@/lib/supabase";
@@ -16,10 +17,11 @@ export default function NewChild() {
     router.push("/children/" + data.id);
   }
 
-  if (!ready) return <main><p className="muted">Ачаалж байна…</p></main>;
+  if (!ready) return <Loading />;
   return (
     <main>
       <h1 className="page round">Хүүхдийн мэдээлэл</h1>
+      <p className="sub">6 богино асуулт. Хариултаар нь хичээлийн шат, үг, тоглоомыг сонгоно.</p>
       <ChildForm submitLabel="Хичээл боловсруулах" onSubmit={create} />
     </main>
   );

@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Icon from "@/components/Icon";
+import Loading from "@/components/Loading";
 import { STAGES } from "@/lib/engine";
 import { ageFromBirth, ageText, type ChildRow } from "@/lib/children";
 import { getSupabase } from "@/lib/supabase";
@@ -23,7 +25,7 @@ export default function Children() {
     });
   }, [ready, router]);
 
-  if (!ready || rows === null) return <main><p className="muted">Ачаалж байна…</p></main>;
+  if (!ready || rows === null) return <Loading />;
 
   return (
     <main>
@@ -33,15 +35,16 @@ export default function Children() {
         const age = ageFromBirth(r.birth_month);
         return (
         <Link key={r.id} href={"/children/" + r.id} className="card child">
-          <span>
-            <b className="round">{r.name || (r.sex === "boy" ? "Хүү" : "Охин")}</b><br />
-            <span className="muted">{ageText(age.years, age.months)}. {STAGES[r.stage]}</span>
+          <span className={"avatar " + r.sex} aria-hidden="true">{(r.name || (r.sex === "boy" ? "Хүү" : "Охин")).charAt(0).toUpperCase()}</span>
+          <span className="body">
+            <b className="round">{r.name || (r.sex === "boy" ? "Хүү" : "Охин")}</b>
+            <span className="muted">{ageText(age.years, age.months)} · {STAGES[r.stage]}</span>
           </span>
-          <span aria-hidden="true">›</span>
+          <Icon name="chevron" />
         </Link>
         );
       })}
-      <Link href="/children/new" className="cta">Хүүхэд нэмэх</Link>
+      <Link href="/children/new" className="ghost"><Icon name="plus" size={18} /> Хүүхэд нэмэх</Link>
     </main>
   );
 }

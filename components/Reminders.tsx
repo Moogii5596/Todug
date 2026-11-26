@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Icon from "@/components/Icon";
 import { getSupabase } from "@/lib/supabase";
 
 const VAPID = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY ?? "";
@@ -76,7 +77,7 @@ export default function Reminders() {
 
   return (
     <div className="card">
-      <h3>Сануулга</h3>
+      <div className="cardhead"><span className="badge"><Icon name="bell" size={18} /></span><h3 className="round">Сануулга</h3></div>
       <p className="muted">
         Долоо хоногт гурван мэдэгдэл: даваа гарагт энэ долоо хоногийн зорилго, лхагва гарагт хийх зүйл, бямба гарагт ахицаа тэмдэглэх сануулга. Орой 19 цагийн орчим ирнэ.
       </p>
@@ -88,7 +89,7 @@ export default function Reminders() {
       {status === "off" && <button className="ghost" disabled={busy} onClick={enable}>{busy ? "Асааж байна…" : "Сануулга асаах"}</button>}
       {status === "on" && (
         <>
-          <p><b>Энэ төхөөрөмж дээр асаалттай.</b></p>
+          <p className="ok" role="status" style={{ marginBottom: 12 }}>Энэ төхөөрөмж дээр асаалттай.</p>
           <button className="ghost" disabled={busy} onClick={disable}>{busy ? "Унтрааж байна…" : "Сануулга унтраах"}</button>
         </>
       )}

@@ -12,7 +12,7 @@ export default function Blog() {
   return (
     <main>
       <h1 className="page round">Блог</h1>
-      <p className="muted" style={{ marginBottom: 14 }}>Хүүхдийн хэл ярианы хөгжлийн тухай эцэг эхэд зориулсан зөвлөмж.</p>
+      <p className="sub">Хүүхдийн хэл ярианы хөгжлийн тухай эцэг эхэд зориулсан зөвлөмж.</p>
       {POSTS.map(p => (
         <Link key={p.slug} href={"/blog/" + p.slug} className="card post">
           <h2 className="round">{p.title}</h2>
