@@ -124,22 +124,24 @@ export default function Admin() {
       {rows?.length === 0 && !err && <p className="muted" style={{ marginTop: 12 }}>Захиалга алга.</p>}
       <div style={{ marginTop: 12 }}>
         {rows?.map(o => (
-          <div className="card" key={o.id}>
+          <div className="card" key={o.status + o.id}>
             <div className="orderhead">
               <b className="paycode">{o.code}</b>
-              <span className={"tag " + o.status}>{STATUS[o.status]}</span>
+              <span className={"tag " + (o.status === "archived" ? "paid" : o.status)}>{STATUS[o.status]}</span>
             </div>
             <dl className="facts">
               <dt>Дүн</dt><dd><b>{money(o.amount)}</b> · {o.plan_label}</dd>
               <dt>Имэйл</dt><dd style={{ overflowWrap: "anywhere" }}>{o.email}</dd>
               <dt>Үүссэн</dt><dd>{dateText(o.created_at)}</dd>
-              {o.status === "paid" && <><dt>Эрх</dt><dd>{dateText(o.access_until)} хүртэл</dd></>}
+              {(o.status === "paid" || o.status === "archived") && <><dt>Эрх</dt><dd>{dateText(o.access_until)} хүртэл</dd></>}
               {o.status !== "pending" && <><dt>Шийдсэн</dt><dd>{dateText(o.decided_at)}</dd></>}
             </dl>
-            <div className="rowbtns">
-              {o.status !== "paid" && <button className="cta" disabled={busy === o.id} onClick={() => setStatus(o, "paid")}>Төлсөн болгох</button>}
-              {o.status !== "cancelled" && <button className="ghost danger" disabled={busy === o.id} onClick={() => setStatus(o, "cancelled")}>Цуцлах</button>}
-            </div>
+            {o.status !== "archived" && (
+              <div className="rowbtns">
+                {o.status !== "paid" && <button className="cta" disabled={busy === o.id} onClick={() => setStatus(o, "paid")}>Төлсөн болгох</button>}
+                {o.status !== "cancelled" && <button className="ghost danger" disabled={busy === o.id} onClick={() => setStatus(o, "cancelled")}>Цуцлах</button>}
+              </div>
+            )}
           </div>
         ))}
       </div>

@@ -14,10 +14,11 @@ export type Order = {
   id: number; code: string; plan_id: string; months: number; amount: number; status: OrderStatus;
   created_at: string; decided_at: string | null; access_until: string | null;
 };
-export type AdminOrder = Omit<Order, "plan_id"> & { email: string; plan_label: string };
+/* archived: бүртгэлээ устгасан хэрэглэгчийн төлсөн захиалга (зөвхөн админы жагсаалтад) */
+export type AdminOrder = Omit<Order, "plan_id" | "status"> & { status: OrderStatus | "archived"; email: string; plan_label: string };
 
-export const STATUS: Record<OrderStatus, string> = {
-  pending: "Төлбөр хүлээгдэж байна", paid: "Төлсөн", cancelled: "Цуцалсан",
+export const STATUS: Record<OrderStatus | "archived", string> = {
+  pending: "Төлбөр хүлээгдэж байна", paid: "Төлсөн", cancelled: "Цуцалсан", archived: "Төлсөн · бүртгэл устсан",
 };
 
 /* 19900 -> "19,900₮" */

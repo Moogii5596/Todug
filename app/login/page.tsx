@@ -1,8 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { configured, getSupabase } from "@/lib/supabase";
+import { useSession } from "@/lib/useSession";
 
 /* Vercel дээрх NEXT_PUBLIC_OAUTH_PROVIDERS хувьсагчид бичигдсэн үйлчилгээний товч л харагдана.
    Жишээ нь: google,facebook. Supabase дээр тухайн үйлчилгээг идэвхжүүлсний дараа нэмнэ. */
@@ -59,6 +60,12 @@ export default function Login() {
   const [ok, setOk] = useState("");
   const [busy, setBusy] = useState(false);
 
+  // Аль хэдийн нэвтэрсэн хэрэглэгчид нэвтрэх, бүртгүүлэх маягт харуулахгүй
+  const { session, loading } = useSession();
+  useEffect(() => {
+    if (!loading && session) router.replace("/children");
+  }, [loading, session, router]);
+
   function go(m: Mode) { setMode(m); setMsg(""); setOk(""); }
 
   async function submit(e: React.FormEvent) {
@@ -84,6 +91,11 @@ export default function Login() {
       : await sb.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + "/children" } });
     setBusy(false);
     if (error) { setMsg(explain(error, mode)); return; }
+    // Бүртгэлтэй имэйлээр дахин бүртгүүлэхэд Supabase алдаа буцаахгүй, identities нь хоосон хэрэглэгч буцаадаг
+    if (mode === "up" && !data.session && data.user && data.user.identities?.length === 0) {
+      setMsg("Энэ имэйл бүртгэлтэй байна. Нэвтэрнэ үү. Нууц үгээ мартсан бол сэргээнэ үү.");
+      return;
+    }
     if (!data.session) { setOk("Имэйл рүү тань баталгаажуулах холбоос илгээлээ. Баталгаажуулаад нэвтэрнэ үү."); return; }
     router.push("/children");
   }

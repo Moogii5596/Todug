@@ -35,7 +35,7 @@
 
 ## Ажиллуулах
 
-1. [Supabase](https://supabase.com) дээр төсөл үүсгээд SQL Editor-т эхлээд `supabase/migrations/0001_init.sql`, дараа нь `supabase/migrations/0002_improvements.sql`, `0003_todug_schema.sql`, `0004_billing.sql`, `0005_free_limit_admin.sql`, `0006_tracking.sql`, эцэст нь `0007_reminders.sql`-ийг ажиллуулна. Долуулыг нь заавал ажиллуулна (`0006`-г ажиллуулаагүй бол үгийн бүртгэл, долоо хоногийн зорилго харагдахгүй, бусад нь хэвийн ажиллана). Үүний дараа Project Settings > API > Data API хэсэгт Data API-г асааж, Exposed schemas-д `todug`-ийг нэмнэ (хүснэгтүүд `todug` schema-д байрладаг; үүнгүйгээр нэвтэрсний дараа «Ачаалж байна…» дээр гацна).
+1. [Supabase](https://supabase.com) дээр төсөл үүсгээд SQL Editor-т эхлээд `supabase/migrations/0001_init.sql`, дараа нь `supabase/migrations/0002_improvements.sql`, `0003_todug_schema.sql`, `0004_billing.sql`, `0005_free_limit_admin.sql`, `0006_keep_payment_records.sql`, `0007_tracking.sql`, эцэст нь `0008_reminders.sql`-ийг ажиллуулна. Бүгдийг нь заавал ажиллуулна (`0007`-г ажиллуулаагүй бол үгийн бүртгэл, долоо хоногийн зорилго харагдахгүй, бусад нь хэвийн ажиллана). Үүний дараа Project Settings > API > Data API хэсэгт Data API-г асааж, Exposed schemas-д `todug`-ийг нэмнэ (хүснэгтүүд `todug` schema-д байрладаг; үүнгүйгээр нэвтэрсний дараа «Ачаалж байна…» дээр гацна).
 2. Supabase > Authentication > URL Configuration > Redirect URLs хэсэгт сайтын хаягаа `/**` төгсгөлтэй нэмнэ (жишээ нь `http://localhost:3000/**`). Баталгаажуулах холбоос `/children`, нууц үг сэргээх холбоос `/reset` руу буцдаг тул энэ хоёр зам зөвшөөрөгдсөн байх ёстой.
 3. `.env.example`-ийг `.env.local` болгон хуулж, утгуудыг бөглөнө.
 4. Дараах командыг ажиллуулна:
@@ -69,6 +69,19 @@ npm test
 3. Supabase > Authentication > URL Configuration > Redirect URLs хэсэгт сайтын хаягаа `/**` төгсгөлтэй нэмнэ (`/children`, `/reset` хоёулаа хамрагдана).
 4. `NEXT_PUBLIC_OAUTH_PROVIDERS=google,facebook` гэж тохируулаад дахин байршуулна.
 
+## Блог
+
+Нийтлэлүүд `lib/blog.ts` дотор байна. Шинэ нийтлэл нэмэхдээ `POSTS`-д нэг объект нэмэхэд `/blog`, `/blog/[slug]`, sitemap-д автоматаар орно. Агуулгыг хэл засалчаар хянуулна.
+
+## Хайлтын системд бүртгүүлэх
+
+Сайт `/robots.txt`, `/sitemap.xml`-ийг өөрөө гаргана. Нүүр, `/blog`, `/privacy` хайлтад орно; нэвтэрсний дараах хуудсууд `noindex`.
+
+1. Өөрийн домэйн холбосон бол Vercel дээр `NEXT_PUBLIC_SITE_URL=https://таны-домэйн` гэж тохируулна. Хоосон бол Vercel-ийн үндсэн домэйныг авна.
+2. [Google Search Console](https://search.google.com/search-console) дээр сайтаа "URL prefix" төрлөөр нэмж, "HTML tag" аргыг сонгоно. `content="..."` доторх кодыг `GOOGLE_SITE_VERIFICATION` хувьсагчид хийж дахин байршуулаад Verify дарна.
+3. Search Console > Sitemaps хэсэгт `sitemap.xml` гэж оруулна.
+4. [Bing Webmaster Tools](https://www.bing.com/webmasters) дээр Search Console-оос импортлох эсвэл `BING_SITE_VERIFICATION` кодоор баталгаажуулна. Yandex-д `YANDEX_SITE_VERIFICATION`.
+
 ## GitHub руу оруулах
 
 GitHub дээр `todug` нэртэй хоосон репозитор үүсгээд:
@@ -92,5 +105,6 @@ Vercel дээр репозитороо импортлож, `.env.example` дах
 - **Админ:** `todug.admins` хүснэгтэд имэйлээр (жижиг үсгээр). Тэр имэйлээр бүртгүүлж, имэйлээ баталгаажуулсан хэрэглэгч `/admin` хуудсыг үзнэ.
 - **Хүлээн авах данс:** `lib/billing.ts`. Хүлээн авагчийн нэрийг `NEXT_PUBLIC_BANK_HOLDER` хувьсагчаар сольж болно.
 - **Үнэгүй долоо хоногийн хязгаар:** нэг бүртгэлд хамгийн ихдээ 2 өөр шатыг үнэгүй нээнэ (`todug.claim_free_unit`).
+- **Төлбөрийн бүртгэл:** бүртгэлээ устгасан хэрэглэгчийн төлсөн захиалга `todug.orders_archive`-д хадгалагдаж, админы жагсаалтад «бүртгэл устсан» гэж харагдана.
 - **Урилга:** админ `/admin` хуудаснаас имэйлээр урилгын холбоос үүсгэнэ (имэйл илгээхгүй, холбоосыг өөрөө дамжуулна). Хэрэглэгч холбоосоор орж `/reset` хуудсанд нууц үгээ зохионо. Үүнд Vercel дээр `SUPABASE_SERVICE_ROLE_KEY` хувьсагч шаардлагатай.
 - **Түгжээ:** төлбөргүй хэрэглэгчид зөвхөн хөтөлбөрийн эхний долоо хоногийн агуулга серверээс очно. `lib/content.ts`-ийг клиент компонентоос импортолж болохгүй.

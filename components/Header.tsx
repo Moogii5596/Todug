@@ -22,7 +22,12 @@ export default function Header() {
             <button className="link" onClick={signOut}>Гарах</button>
           </>
         )}
-        {!loading && !session && <Link href="/login" className="link">Нэвтрэх</Link>}
+        {!loading && !session && (
+          <>
+            <Link href="/blog" className="link">Блог</Link>
+            <Link href="/login" className="link">Нэвтрэх</Link>
+          </>
+        )}
       </nav>
     </header>
   );

@@ -238,7 +238,7 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
               childId={childId} access={loaded.access}
               weekDone={weekDone} trackable={week !== "x"} onToggle={onToggle} onResetUnit={onResetUnit}
               onNext={week === 0 && plan.advance + 1 < plan.seq.length ? () => onAdvance(1) : undefined} />
-          : <Paywall what="Энэ долоо хоногийн хичээл" freeUsed={loaded.freeUsed} />)}
+          : <Paywall what={week === "x" ? "Нэмэлт хичээл" : "Энэ долоо хоногийн хичээл"} freeUsed={loaded.freeUsed} />)}
 
       </div>
 
