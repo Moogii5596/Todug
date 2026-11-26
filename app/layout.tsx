@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import ConfirmProvider from "@/components/Confirm";
+import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 
@@ -28,8 +30,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width", initialScale: 1,
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#EEF3F8" },
-    { media: "(prefers-color-scheme: dark)", color: "#111922" },
+    { media: "(prefers-color-scheme: light)", color: "#F2F5F9" },
+    { media: "(prefers-color-scheme: dark)", color: "#0F161E" },
   ],
 };
 
@@ -38,8 +40,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="mn">
       <body>
         <div className="app">
-          <Header />
-          {children}
+          <ConfirmProvider>
+            <Header />
+            {children}
+            <Footer />
+          </ConfirmProvider>
         </div>
       </body>
     </html>

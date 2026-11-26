@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Icon from "@/components/Icon";
 import { normWord } from "@/lib/engine";
 import { getSupabase } from "@/lib/supabase";
 
@@ -59,20 +60,20 @@ export default function WordLog({ childId }: { childId: string }) {
 
   return (
     <div className="card">
-      <h3 className="round">Миний хүүхдийн үгс</h3>
+      <div className="cardhead"><span className="badge"><Icon name="chat" size={18} /></span><h3 className="round">Миний хүүхдийн үгс</h3></div>
       <p className="muted">
         Хэлдэг {says.length} үг, ойлгодог {understands.length} үг{recent > 0 ? ". Сүүлийн 7 хоногт " + recent + " үг нэмэгдсэн" : ""}.
         Энэ бол таны хувийн тэмдэглэл: оноо, онош биш.
       </p>
       <form onSubmit={add} className="wordform">
         <label className="sr" htmlFor="word-new">Шинэ үг</label>
-        <input id="word-new" type="text" value={text} maxLength={30} placeholder="Шинэ үг" onChange={e => setText(e.target.value)} />
+        <input id="word-new" type="text" value={text} maxLength={30} placeholder="Шинэ үг" autoComplete="off" enterKeyHint="done" onChange={e => setText(e.target.value)} />
         <label className="sr" htmlFor="word-kind">Төрөл</label>
         <select id="word-kind" value={kind} onChange={e => setKind(e.target.value as Word["kind"])}>
           <option value="says">Хэлдэг</option>
           <option value="understands">Ойлгодог</option>
         </select>
-        <button className="ghost" disabled={busy || !normWord(text)}>Нэмэх</button>
+        <button className="ghost" disabled={busy || !normWord(text)}><Icon name="plus" size={18} /> Нэмэх</button>
       </form>
       {msg && <p className="err" role="alert" style={{ marginTop: 8 }}>{msg}</p>}
       {says.length > 0 && (

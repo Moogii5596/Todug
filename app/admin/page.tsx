@@ -1,5 +1,7 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
+import { useConfirm } from "@/components/Confirm";
+import Loading from "@/components/Loading";
 import { STATUS, dateText, money, type AdminOrder, type OrderStatus } from "@/lib/billing";
 import { getSupabase } from "@/lib/supabase";
 import { useRequireAuth } from "@/lib/useRequireAuth";
@@ -67,6 +69,7 @@ function Invite() {
 
 export default function Admin() {
   const { ready } = useRequireAuth();
+  const confirm = useConfirm();
   const [admin, setAdmin] = useState<boolean | null>(null);
   const [filter, setFilter] = useState<OrderStatus | "all">("pending");
   const [q, setQ] = useState("");
@@ -92,10 +95,12 @@ export default function Admin() {
   }, [admin, filter, q, load]);
 
   async function setStatus(o: AdminOrder, status: "paid" | "cancelled") {
-    const ask = status === "paid"
-      ? o.code + " захиалгыг төлсөн болгох уу?\n" + o.email + "\n" + money(o.amount) + " · " + o.months + " сар\n\nДансны хуулга дээр дүн, гүйлгээний утга таарч байгааг шалгасан уу?"
-      : o.code + " захиалгыг цуцлах уу?" + (o.status === "paid" ? " Хэрэглэгчийн эрх хаагдана." : "");
-    if (!window.confirm(ask)) return;
+    const ok = await confirm(status === "paid"
+      ? { title: o.code + " захиалгыг төлсөн болгох уу?", confirmLabel: "Төлсөн болгох",
+          body: o.email + "\n" + money(o.amount) + " · " + o.months + " сар\n\nДансны хуулга дээр дүн, гүйлгээний утга таарч байгааг шалгасан уу?" }
+      : { title: o.code + " захиалгыг цуцлах уу?", confirmLabel: "Цуцлах", cancelLabel: "Болих", danger: true,
+          body: o.status === "paid" ? "Хэрэглэгчийн эрх хаагдана." : undefined });
+    if (!ok) return;
     setBusy(o.id);
     const { error } = await getSupabase().rpc("admin_set_order", { p_id: o.id, p_status: status });
     setBusy(0);
@@ -103,7 +108,7 @@ export default function Admin() {
     await load(filter, q);
   }
 
-  if (!ready || admin === null) return <main><p className="muted">Ачаалж байна…</p></main>;
+  if (!ready || admin === null) return <Loading />;
   if (!admin) return <main><p className="err" role="alert">Энэ хуудсыг үзэх эрхгүй байна.</p></main>;
 
   return (
@@ -111,7 +116,7 @@ export default function Admin() {
       <h1 className="page round">Админ</h1>
       <Invite />
       <h2 className="round" style={{ fontSize: 22, margin: "20px 0 8px" }}>Захиалгууд</h2>
-      <div className="tabs" role="tablist" style={{ margin: "0 0 12px" }}>
+      <div className="tabs" role="tablist" aria-label="Төлөвөөр шүүх" style={{ margin: "0 0 12px" }}>
         {FILTERS.map(f => (
           <button key={f.id} role="tab" aria-selected={filter === f.id} onClick={() => { setRows(null); setFilter(f.id); }}>{f.label}</button>
         ))}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import Icon from "@/components/Icon";
 import { POSTS, dateText, getPost } from "@/lib/blog";
 import { SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -41,10 +42,10 @@ export default async function PostPage({ params }: Props) {
   return (
     <main className="doc">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
-      <p style={{ marginBottom: 6 }}><Link href="/blog" className="link" style={{ padding: 0 }}>‹ Блог</Link></p>
+      <Link href="/blog" className="link subtle back"><Icon name="back" size={18} /> Блог</Link>
       <article>
         <h1 className="page round">{post.title}</h1>
-        <p className="muted">{dateText(post.date)} · {post.minutes} минут унших</p>
+        <p className="sub">{dateText(post.date)} · {post.minutes} минут унших</p>
         {post.body.map((b, i) => {
           if ("h" in b) return <h2 key={i}>{b.h}</h2>;
           if ("p" in b) return <p key={i}>{b.p}</p>;
@@ -53,12 +54,12 @@ export default async function PostPage({ params }: Props) {
         })}
       </article>
 
-      <Link href="/children" className="cta" style={{ marginTop: 18 }}>Хүүхдэдээ тохирсон хичээл авах</Link>
+      <Link href="/children" className="cta" style={{ marginTop: 24 }}>Хүүхдэдээ тохирсон хичээл авах</Link>
       <p className="foot">Энэ нийтлэл ерөнхий мэдээлэл бөгөөд онош, эмчилгээний зөвлөгөө биш. Санаа зовоосон зүйл байвал хэл засалч, хүүхдийн эмчид хандаарай.</p>
 
-      <h2 style={{ marginTop: 26 }}>Бусад нийтлэл</h2>
-      <ul>
-        {others.map(p => <li key={p.slug}><Link href={"/blog/" + p.slug}>{p.title}</Link></li>)}
+      <h2 className="round" style={{ marginTop: 32 }}>Бусад нийтлэл</h2>
+      <ul className="linklist">
+        {others.map(p => <li key={p.slug}><Link href={"/blog/" + p.slug}>{p.title}<Icon name="chevron" size={18} /></Link></li>)}
       </ul>
     </main>
   );

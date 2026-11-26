@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Icon from "@/components/Icon";
 import { suggestNext } from "@/lib/engine";
 import { getSupabase } from "@/lib/supabase";
 
@@ -37,7 +38,7 @@ export default function SignCheck({ childId, unitId, signs, onNext }: Props) {
   const ready = checked != null && suggestNext(seen, signs.length) === "advance";
   return (
     <div className="card">
-      <h3 className="round">Зорилго биелсний шинж</h3>
+      <div className="cardhead"><span className="badge green"><Icon name="check" size={18} /></span><h3 className="round">Зорилго биелсний шинж</h3></div>
       <p className="muted">
         {checked ? "Ажиглагдсан шинжээ тэмдэглээрэй. " : ""}Талаас илүү нь ажиглагдвал дараагийн шат руу шилжинэ. Үгүй бол энэ долоо хоногоо давтана.
       </p>

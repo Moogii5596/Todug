@@ -4,6 +4,7 @@ import Link from "next/link";
 import { LIKES, ROUTINES, STAGES, UNITS, buildPlan, fill, type Like, type Profile, type Unit, type UnitContent } from "@/lib/engine";
 import { ageText } from "@/lib/children";
 import { getSupabase } from "@/lib/supabase";
+import Icon, { type IconName } from "@/components/Icon";
 import SignCheck from "@/components/SignCheck";
 import WeekGoal from "@/components/WeekGoal";
 import WordLog from "@/components/WordLog";
@@ -38,9 +39,18 @@ function Talk({ talk, v, childName }: { talk: string[][]; v: Like; childName: st
 function UnitHead({ u }: { u: Unit }) {
   return (
     <>
-      <h2 className="round" style={{ fontSize: 22, margin: "0 0 8px" }}>{u.title}</h2>
+      <h2 className="round unit-title">{u.title}</h2>
       <p className="goal"><b>Зорилго:</b> {u.goal}</p>
     </>
+  );
+}
+
+function Head({ icon, tone = "", children }: { icon: IconName; tone?: string; children: React.ReactNode }) {
+  return (
+    <div className="cardhead">
+      <span className={"badge " + tone}><Icon name={icon} size={18} /></span>
+      <h3 className="round">{children}</h3>
+    </div>
   );
 }
 
@@ -78,7 +88,8 @@ function UnitBlock({ u, unitId, weekIdx, p, childId, access, weekDone, trackable
     <>
       {u.note && <div className="alert amber">{u.note}</div>}
       <div className="card">
-        <h3 className="round">Энэ долоо хоногийн арга: {u.strategy.name}</h3>
+        <div className="use">Энэ долоо хоногийн арга</div>
+        <Head icon="bulb">{u.strategy.name}</Head>
         <p className="muted">{u.why}</p>
         <ul className="steps">{u.strategy.how.map(s => <li key={s}>{s}</li>)}</ul>
         <div className="use" style={{ marginTop: 12 }}>Энэ долоо хоногт олон давтах үг, хэллэг</div>
@@ -86,37 +97,48 @@ function UnitBlock({ u, unitId, weekIdx, p, childId, access, weekDone, trackable
       </div>
 
       <div className="card lesson">
-        <h3 className="round">Өдөр бүр нэг хэвшилд</h3>
+        <Head icon="calendar">Өдөр бүр нэг хэвшилд</Head>
         <p className="muted">
-          {trackable ? weekDone.length + " / 7 өдөр хийсэн. " : ""}Нэг аргаа өдөр бүр өөр хэвшил дотор давтана. Өдрөө сонгоно уу.
+          {trackable ? <b>{weekDone.length} / 7 өдөр хийсэн. </b> : ""}Нэг аргаа өдөр бүр өөр хэвшил дотор давтана. Өдрөө сонгоно уу.
         </p>
+        {trackable && (
+          <div className="meter" role="progressbar" aria-label="Энэ долоо хоногийн ахиц" aria-valuemin={0} aria-valuemax={7} aria-valuenow={weekDone.length}>
+            <i style={{ width: (weekDone.length / 7) * 100 + "%" }} />
+          </div>
+        )}
         {trackable && <WeekGoal childId={childId} unitId={unitId} done={weekDone.length} access={access} />}
-        <div className="days">
+        <div className="week7" role="group" aria-label="Өдөр сонгох">
           {[1, 2, 3, 4, 5, 6, 7].map(d => (
             <button key={d} aria-pressed={weekDone.includes(d)} aria-current={d === day ? "true" : undefined}
-              aria-label={d + "-р өдөр" + (weekDone.includes(d) ? ", хийсэн" : "")} onClick={() => setPicked(d)}>{d}</button>
+              aria-label={d + "-р өдөр" + (weekDone.includes(d) ? ", хийсэн" : "")} onClick={() => setPicked(d)}>
+              {weekDone.includes(d) ? <Icon name="check" size={18} /> : d}
+            </button>
           ))}
         </div>
-        <div className="use" style={{ marginTop: 14 }}>{day}-р өдөр · {ROUTINES[tip.routine]} · {p.time} минут орчим</div>
-        <p style={{ margin: 0 }}>{fill(tip.todo, v)}</p>
-        <Talk talk={tip.talk} v={v} childName={p.name || "Хүүхэд"} />
-        {trackable && (
-          <button className={isDone ? "ghost" : "cta"} style={{ marginTop: 12 }} onClick={() => { setPicked(day); onToggle(unitId, day); }}>
-            {isDone ? "Хийгээгүй болгох" : "Хийлээ"}
-          </button>
-        )}
-        {trackable && weekDone.length > 0 && (
-          <button className="link" style={{ marginTop: 10, padding: 0 }} onClick={() => onResetUnit(unitId)}>
-            Энэ долоо хоногийг дахин эхлүүлэх
-          </button>
-        )}
+        <div className="daycard">
+          <div className="use">{day}-р өдөр · {ROUTINES[tip.routine]} · {p.time} минут орчим</div>
+          <p>{fill(tip.todo, v)}</p>
+          <Talk talk={tip.talk} v={v} childName={p.name || "Хүүхэд"} />
+          {trackable && (
+            <button className={isDone ? "ghost" : "cta"} style={{ marginTop: 14 }} onClick={() => { setPicked(day); onToggle(unitId, day); }}>
+              {isDone ? "Хийгээгүй болгох" : <><Icon name="check" size={18} /> {day}-р өдрийг хийлээ</>}
+            </button>
+          )}
+          {trackable && weekDone.length > 0 && (
+            <div style={{ textAlign: "center", marginTop: 6 }}>
+              <button className="link subtle" onClick={() => onResetUnit(unitId)}>
+                <Icon name="repeat" size={16} /> Энэ долоо хоногийг дахин эхлүүлэх
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="alert green"><b>Урам</b>{u.cheer}</div>
       <SignCheck childId={childId} unitId={unitId} signs={u.signs} onNext={onNext} />
       <div className="alert amber"><b>Хэцүү байвал</b>{u.stuck}</div>
       <div className="card">
-        <h3 className="round">Мэргэжилтэнд хандах үе</h3>
+        <Head icon="steth" tone="amber">Мэргэжилтэнд хандах үе</Head>
         <ul className="steps">{u.refer.map(s => <li key={s}>{s}</li>)}</ul>
       </div>
     </>
@@ -201,7 +223,10 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
   return (
     <div>
       <div className="card">
-        <h2 className="round">{who}: {plan.verdict}</h2>
+        <div className="who">
+          <span className={"avatar " + p.sex} aria-hidden="true">{(p.name || (p.sex === "boy" ? "Хүү" : "Охин")).charAt(0).toUpperCase()}</span>
+          <h2 className="round">{who}: {plan.verdict}</h2>
+        </div>
         <dl className="facts">
           <dt>Нас, хүйс</dt><dd>{ageText(p.years, p.months)}, {p.sex === "boy" ? "хүү" : "охин"}</dd>
           <dt>Одоо</dt><dd>{STAGES[p.stage]}</dd>
@@ -214,24 +239,29 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
         <div key={a.t} className={"alert " + a.lvl}><b>{a.t}</b>{a.d}</div>
       ))}
 
-      <p className="muted" style={{ margin: "20px 0 0" }}>
-        {Math.floor(plan.advance / 4) + 1}-р мөчлөг (4 долоо хоног). Үр дүнтэй хөтөлбөрүүд 10–13 долоо хоног үргэлжилдэг тул нэг мөчлөгөөр дүгнэхгүй, гурван мөчлөг үргэлжлүүлэхийг зорино уу.
+      <h2 className="round" style={{ fontSize: 20, margin: "26px 0 4px" }}>{Math.floor(plan.advance / 4) + 1}-р мөчлөг · долоо хоногууд</h2>
+      <p className="muted" style={{ margin: 0 }}>
+        Үр дүнтэй хөтөлбөрүүд 10–13 долоо хоног үргэлжилдэг тул нэг мөчлөгөөр дүгнэхгүй, гурван мөчлөг үргэлжлүүлэхийг зорино уу.
       </p>
 
-      <div ref={tabsRef} className="tabs" role="tablist" style={{ gridTemplateColumns: `repeat(${plan.ids.length + (plan.extra != null ? 1 : 0)}, 1fr)` }}>
+      <div ref={tabsRef} className="tabs" role="tablist" aria-label="Долоо хоног сонгох" style={{ gridTemplateColumns: `repeat(${plan.ids.length + (plan.extra != null ? 1 : 0)}, 1fr)` }}>
         {plan.ids.map((_, i) => (
           <button key={i} id={tabId(i)} role="tab" aria-selected={week === i} aria-controls="plan-panel" onClick={() => pick(i)}>
-            {plan.advance + i + 1}-р долоо хоног
+            <span className="sr">{plan.advance + i + 1}-р долоо хоног</span>
+            <b aria-hidden="true">{plan.advance + i + 1}</b>
+            <small className={(done[plan.ids[i]] ?? []).length >= 7 ? "full" : ""} aria-label={(done[plan.ids[i]] ?? []).length + " өдөр хийсэн"}>
+              {(done[plan.ids[i]] ?? []).length}/7
+            </small>
           </button>
         ))}
         {plan.extra != null && (
-          <button id={tabId("x")} role="tab" aria-selected={week === "x"} aria-controls="plan-panel" onClick={() => pick("x")}>Нэмэлт</button>
+          <button id={tabId("x")} role="tab" aria-selected={week === "x"} aria-controls="plan-panel" onClick={() => pick("x")}><b aria-hidden="true">+</b><small>Нэмэлт</small></button>
         )}
       </div>
 
       <div id="plan-panel" role="tabpanel" aria-labelledby={tabId(week)}>
         <UnitHead u={unit} />
-        {!loaded && <p className="muted">Хичээлийг ачаалж байна…</p>}
+        {!loaded && <div className="skel" role="status" aria-label="Хичээлийг ачаалж байна"><i className="l" /><i className="l" /></div>}
         {loaded?.err && <p className="err" role="alert">{loaded.err}</p>}
         {loaded && !loaded.err && (loaded.units[unitId]
           ? <UnitBlock key={unitId} u={loaded.units[unitId]} unitId={unitId} weekIdx={week === "x" ? 0 : plan.advance + week} p={p}
@@ -245,7 +275,7 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
       <WordLog childId={childId} />
 
       <div className="card">
-        <h3 className="round">Цааш үргэлжлүүлэх</h3>
+        <Head icon="flag">Цааш үргэлжлүүлэх</Head>
         {plan.hasNext ? (
           <>
             <p className="muted">Долоо хоног бүрийн зорилго биелсэн бол дараагийн шат руу шилжээрэй. Яарах хэрэггүй, хүүхдийнхээ хэмнэлээр явна.</p>
@@ -260,7 +290,7 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
       </div>
 
       <div className="card">
-        <h3 className="round">Нэмэлт тоглоом</h3>
+        <Head icon="spark">Нэмэлт тоглоом</Head>
         <p className="muted">Энэ долоо хоногийн аргад тааруулан хиймэл оюунаар шинэ тоглоом зохиолгоно.</p>
         {loaded && !loaded.access ? (
           <>
@@ -270,11 +300,11 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
         ) : (
           <>
         <button className="ghost" onClick={makeGames} disabled={aiBusy}>
-          {aiBusy ? "Зохиож байна…" : games.length ? "Өөр тоглоом зохиолгох" : "Шинэ тоглоом зохиолгох"}
+          {aiBusy && <span className="spin" />}{aiBusy ? "Зохиож байна…" : games.length ? "Өөр тоглоом зохиолгох" : "Шинэ тоглоом зохиолгох"}
         </button>
-        {aiMsg && <p className="err" style={{ marginTop: 12 }}>{aiMsg}</p>}
+        {aiMsg && <p className="err" role="alert" style={{ marginTop: 12 }}>{aiMsg}</p>}
         {games.map((g, gi) => (
-          <div className="card lesson" key={gi} style={{ background: "var(--bg)", marginTop: 12 }}>
+          <div className="card flat lesson" key={gi} style={{ marginTop: 12, marginBottom: 0 }}>
             <h3 className="round">{g.name}</h3>
             <ul className="steps">{(g.steps || []).map((s, si) => <li key={si}>{s}</li>)}</ul>
             {g.say && <div className="talk" style={{ background: "var(--surface)" }}><div className="say p">{g.say}</div></div>}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Icon from "@/components/Icon";
 import { POSTS } from "@/lib/blog";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
@@ -23,31 +24,36 @@ export default function Home() {
     <main>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <section className="hero">
+        <p className="eyebrow">Хэл ярианы гэрийн хөтөлбөр</p>
         <h1 className="round">Хүүхдийнхээ тухай хэлээрэй, хичээлийг нь тааруулъя</h1>
-        <p>Нас, одоогийн яриа, сонирхлыг нь оруулахад 4 долоо хоногийн гэрийн дасгалын төлөвлөгөө гарна.</p>
+        <p className="lead">Нас, одоогийн яриа, сонирхлыг нь оруулахад 4 долоо хоногийн гэрийн дасгалын төлөвлөгөө гарна.</p>
+        <Link href="/children" className="cta">Хичээл боловсруулах <Icon name="chevron" size={18} /></Link>
+        <p className="note"><Icon name="check" size={16} /> Эхний долоо хоногийн хичээл үнэгүй</p>
         <div className="demo" aria-hidden="true">
+          <div className="cap r">Хүүхэд</div>
           <div className="say c">Машин</div>
+          <div className="cap">Та</div>
           <div className="say p"><mark>Том</mark> машин.</div>
+          <p className="tip">Хүүхдийн хэлсэн үг дээр нэг үг нэмж хариулна. Хичээл бүр ийм бэлэн жишээтэй.</p>
         </div>
       </section>
 
-      <ol className="how">
-        <li>Бүртгүүлж, хүүхдийнхээ мэдээллийг оруулна.</li>
-        <li>Ярианы түвшинд нь тохирсон шатнаас хичээл эхэлнэ.</li>
-        <li>Өдөр бүр 10–30 минут тоглож, хийсэн өдрөө тэмдэглэнэ.</li>
-        <li>Долоо хоног бүр дараагийн шат руу ахина.</li>
-      </ol>
+      <section className="section" aria-labelledby="how-title">
+        <h2 id="how-title" className="round">Хэрхэн ажилладаг вэ</h2>
+        <ol className="how">
+          <li>Бүртгүүлж, хүүхдийнхээ мэдээллийг оруулна.</li>
+          <li>Ярианы түвшинд нь тохирсон шатнаас хичээл эхэлнэ.</li>
+          <li>Өдөр бүр 10–30 минут тоглож, хийсэн өдрөө тэмдэглэнэ.</li>
+          <li>Долоо хоног бүр дараагийн шат руу ахина.</li>
+        </ol>
+      </section>
 
-      <Link href="/children" className="cta">Хичээл боловсруулах</Link>
-      <p className="foot">Todug онош тавихгүй. Гэрийн дасгал нь хэл засалч, эмчийн үзлэгийг орлохгүй.</p>
-
-      <section className="doc" style={{ marginTop: 28 }}>
-        <h2 className="round">Эцэг эхэд зориулсан зөвлөмж</h2>
-        <ul>
-          {POSTS.map(p => <li key={p.slug}><Link href={"/blog/" + p.slug}>{p.title}</Link></li>)}
+      <section className="section" aria-labelledby="tips-title">
+        <h2 id="tips-title" className="round">Эцэг эхэд зориулсан зөвлөмж</h2>
+        <ul className="linklist">
+          {POSTS.map(p => <li key={p.slug}><Link href={"/blog/" + p.slug}>{p.title}<Icon name="chevron" size={18} /></Link></li>)}
         </ul>
       </section>
-      <p className="foot" style={{ marginTop: 6 }}><Link href="/blog">Блог</Link> · <Link href="/privacy">Нууцлалын бодлого</Link></p>
     </main>
   );
 }

@@ -1,33 +1,28 @@
 "use client";
+import { Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { getSupabase } from "@/lib/supabase";
+import { usePathname } from "next/navigation";
+import type { Session } from "@supabase/supabase-js";
 import { useSession } from "@/lib/useSession";
+
+/* usePathname нь динамик замд урьдчилан зурагдахгүй тул цэсийг Suspense дотор тусад нь зурна */
+function Nav({ session }: { session: Session | null }) {
+  const path = usePathname();
+  const item = (href: string, label: string, cls = "") => (
+    <Link href={href} className={"navlink " + cls} aria-current={path === href || path.startsWith(href + "/") ? "page" : undefined}>{label}</Link>
+  );
+  return session
+    ? <>{item("/children", "Хүүхдүүд")}{item("/account", "Бүртгэл")}</>
+    : <>{item("/blog", "Блог")}{path !== "/login" && item("/login", "Нэвтрэх", "solid")}</>;
+}
 
 export default function Header() {
   const { session, loading } = useSession();
-  const router = useRouter();
-  async function signOut() {
-    await getSupabase().auth.signOut();
-    router.push("/");
-  }
   return (
     <header className="top">
-      <Link href="/" className="brand round">Tod<span>ug</span></Link>
-      <nav>
-        {!loading && session && (
-          <>
-            <Link href="/children" className="link">Хүүхдүүд</Link>
-            <Link href="/account" className="link">Бүртгэл</Link>
-            <button className="link" onClick={signOut}>Гарах</button>
-          </>
-        )}
-        {!loading && !session && (
-          <>
-            <Link href="/blog" className="link">Блог</Link>
-            <Link href="/login" className="link">Нэвтрэх</Link>
-          </>
-        )}
+      <Link href={session ? "/children" : "/"} className="brand round" aria-label="Todug, эхлэл">Tod<span>ug</span></Link>
+      <nav aria-label="Үндсэн цэс">
+        {!loading && <Suspense fallback={null}><Nav session={session} /></Suspense>}
       </nav>
     </header>
   );

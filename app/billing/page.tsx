@@ -1,6 +1,9 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useConfirm } from "@/components/Confirm";
+import Icon from "@/components/Icon";
+import Loading from "@/components/Loading";
 import { BANK, STATUS, activeUntil, dateText, money, type Order, type PlanRow } from "@/lib/billing";
 import { getSupabase } from "@/lib/supabase";
 import { useRequireAuth } from "@/lib/useRequireAuth";
@@ -10,11 +13,12 @@ function Copy({ text, label }: { text: string; label: string }) {
   async function copy() {
     try { await navigator.clipboard.writeText(text); setDone(true); setTimeout(() => setDone(false), 1500); } catch { /* хуулж чадахгүй бол гараар бичнэ */ }
   }
-  return <button type="button" className="link copy" onClick={copy} aria-label={label + " хуулах"}>{done ? "Хууллаа" : "Хуулах"}</button>;
+  return <button type="button" className="link copy" onClick={copy} aria-label={label + " хуулах"}><Icon name={done ? "check" : "copy"} size={15} /> <span aria-live="polite">{done ? "Хууллаа" : "Хуулах"}</span></button>;
 }
 
 export default function Billing() {
   const { ready } = useRequireAuth();
+  const confirm = useConfirm();
   const [plans, setPlans] = useState<PlanRow[] | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [err, setErr] = useState("");
@@ -45,7 +49,7 @@ export default function Billing() {
 
   async function choose(plan: PlanRow) {
     if (pending && pending.plan_id !== plan.id
-      && !window.confirm("Хүлээгдэж буй " + pending.code + " захиалга цуцлагдаж, шинэ дугаар үүснэ. Хэрэв аль хэдийн мөнгөө шилжүүлсэн бол бүү солиорой. Үргэлжлүүлэх үү?")) return;
+      && !(await confirm({ title: "Багцаа солих уу?", body: "Хүлээгдэж буй " + pending.code + " захиалга цуцлагдаж, шинэ дугаар үүснэ. Хэрэв аль хэдийн мөнгөө шилжүүлсэн бол бүү солиорой.", confirmLabel: "Солих" }))) return;
     setErr(""); setBusy(plan.id);
     const { error } = await getSupabase().rpc("create_order", { p_plan: plan.id });
     setBusy("");
@@ -57,7 +61,7 @@ export default function Billing() {
     window.scrollTo({ top: 0 });
   }
 
-  if (!ready || plans === null) return <main><p className="muted">Ачаалж байна…</p></main>;
+  if (!ready || plans === null) return <Loading />;
 
   return (
     <main>
@@ -92,8 +96,12 @@ export default function Billing() {
         {plans.length === 0 && <p className="muted">Одоогоор багц алга.</p>}
         <div className="stack" style={{ marginTop: 12 }}>
           {plans.map(pl => (
-            <button key={pl.id} className={pending?.plan_id === pl.id ? "ghost" : "cta"} disabled={!!busy || pending?.plan_id === pl.id} onClick={() => choose(pl)}>
-              {busy === pl.id ? "Түр хүлээнэ үү…" : pl.label + " · " + money(pl.amount) + (pending?.plan_id === pl.id ? " (сонгосон)" : "")}
+            <button key={pl.id} className={"plan" + (pending?.plan_id === pl.id ? " on" : "")} disabled={!!busy || pending?.plan_id === pl.id} onClick={() => choose(pl)}>
+              <span>
+                <b className="round">{pl.label}</b>
+                <small>{busy === pl.id ? "Түр хүлээнэ үү…" : pending?.plan_id === pl.id ? "Сонгосон багц" : pl.months > 1 ? "Сард " + money(Math.round(pl.amount / pl.months)) : "Сонгох"}</small>
+              </span>
+              <span className="price">{busy === pl.id ? <span className="spin" /> : <b>{money(pl.amount)}</b>}</span>
             </button>
           ))}
         </div>

@@ -2,6 +2,9 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { useConfirm } from "@/components/Confirm";
+import Icon from "@/components/Icon";
+import Loading from "@/components/Loading";
 import PlanView from "@/components/PlanView";
 import { rowToProfile, type ChildRow } from "@/lib/children";
 import { buildPlan, type Profile } from "@/lib/engine";
@@ -12,6 +15,7 @@ export default function Child() {
   const { id } = useParams<{ id: string }>();
   const { ready } = useRequireAuth();
   const router = useRouter();
+  const confirm = useConfirm();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [done, setDone] = useState<Record<number, number[]>>({});
   const [err, setErr] = useState("");
@@ -58,7 +62,7 @@ export default function Child() {
   }
 
   async function resetUnit(unit: number) {
-    if (!window.confirm("Энэ долоо хоногийн тэмдэглэсэн өдрүүдийг арилгаж, дахин эхлүүлэх үү?")) return;
+    if (!(await confirm({ title: "Долоо хоногийг дахин эхлүүлэх үү?", body: "Энэ долоо хоногийн тэмдэглэсэн өдрүүд арилна.", confirmLabel: "Дахин эхлүүлэх" }))) return;
     const { error } = await getSupabase().from("todug_progress").delete().eq("child_id", id).eq("unit", unit);
     if (error) { setErr("Тэмдэглэгээг арилгаж чадсангүй. Дахин оролдоно уу."); return; }
     setDone(prev => ({ ...prev, [unit]: [] }));
@@ -77,23 +81,24 @@ export default function Child() {
   }
 
   async function remove() {
-    if (!window.confirm("Энэ хүүхдийн мэдээлэл, ахицыг бүр мөсөн устгах уу?")) return;
+    if (!(await confirm({ title: "Хүүхдийг устгах уу?", body: "Энэ хүүхдийн мэдээлэл, ахиц бүр мөсөн устана. Буцаах боломжгүй.", confirmLabel: "Устгах", danger: true }))) return;
     const { error } = await getSupabase().from("todug_children").delete().eq("id", id);
     if (error) { setErr("Устгаж чадсангүй. Дахин оролдоно уу."); return; }
     router.push("/children");
   }
 
   if (err && !profile) return <main><p className="err" role="alert">{err}</p><Link href="/children" className="ghost">Хүүхдүүд рүү буцах</Link></main>;
-  if (!ready || !profile) return <main><p className="muted">Ачаалж байна…</p></main>;
+  if (!ready || !profile) return <Loading />;
 
   return (
     <main>
+      <Link href="/children" className="link subtle back"><Icon name="back" size={18} /> Хүүхдүүд</Link>
       {progErr && <p className="err" role="alert">Ахицыг ачаалж чадсангүй. Хуудсаа дахин ачаална уу.</p>}
       {err && <p className="err" role="alert">{err}</p>}
       <PlanView profile={profile} childId={id} done={done} onToggle={toggle} onAdvance={advance} onResetUnit={resetUnit} />
-      <div className="rowbtns">
-        <Link href={"/children/" + id + "/edit"} className="ghost">Мэдээлэл засах</Link>
-        <button className="ghost danger" onClick={remove}>Хүүхдийг устгах</button>
+      <div className="stack" style={{ marginTop: 20, alignItems: "center", gap: 4 }}>
+        <Link href={"/children/" + id + "/edit"} className="ghost"><Icon name="edit" size={18} /> Мэдээлэл засах</Link>
+        <button className="link danger" onClick={remove}>Хүүхдийг устгах</button>
       </div>
     </main>
   );
