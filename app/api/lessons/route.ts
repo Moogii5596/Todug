@@ -1,6 +1,6 @@
 import { CONTENT } from "@/lib/content";
 import { rowToProfile, type ChildRow } from "@/lib/children";
-import { buildPlan, unlockedIds, type UnitContent } from "@/lib/engine";
+import { buildPlan, unlockedIds, type UnitContent, type UnitPreview } from "@/lib/engine";
 import { userClient, UUID_RE } from "@/lib/server";
 
 /* Хүүхдийн одоогийн 4 долоо хоногийн хичээлийн агуулгыг буцаана.
@@ -39,5 +39,11 @@ export async function POST(request: Request) {
   }
   const units: Record<number, UnitContent> = {};
   for (const id of ids) units[id] = CONTENT[id];
-  return Response.json({ access: access === true, freeUsed, units }, { headers: { "Cache-Control": "no-store" } });
+  /* Түгжээтэй долоо хоногт юу байгааг харуулах гарчгууд: хичээлийн алхам, яриа орохгүй */
+  const preview: Record<number, UnitPreview> = {};
+  for (const id of plan.extra == null ? plan.ids : [...plan.ids, plan.extra]) {
+    if (units[id]) continue;
+    preview[id] = { strategy: CONTENT[id].strategy.name, days: CONTENT[id].days.map(d => ({ routine: d.routine, title: d.title })) };
+  }
+  return Response.json({ access: access === true, freeUsed, units, preview }, { headers: { "Cache-Control": "no-store" } });
 }

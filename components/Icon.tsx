@@ -21,11 +21,14 @@ const PATHS = {
   meal: <><path d="M4 11h16a8 8 0 0 1-16 0Z" /><path d="M9 4c0 1.5 1 1.5 1 3M13 4c0 1.5 1 1.5 1 3" /></>,
   bath: <><path d="M3 12h18v2a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5Z" /><path d="M6 12V6a2 2 0 0 1 4 0" /></>,
   dress: <path d="M8 4 3 7l2 4 2-1v10h10V10l2 1 2-4-5-3a4 4 0 0 1-8 0Z" />,
-  play: <><circle cx="12" cy="12" r="8.5" /><path d="M5.5 7.5c3 1 5 3.5 5.5 7M18.5 7.5c-3 1-5 3.5-5.5 7" /></>,
+  play: <><circle cx="12" cy="12" r="8.5" /><path d="M4 10.5c5 2.5 11 2.5 16 0M8 4.6c2.5 4.5 2.5 10.3 0 14.8" /></>,
   out: <><path d="M12 21v-7" /><path d="M12 3a5 5 0 0 0-4 8 4 4 0 0 0 4 3 4 4 0 0 0 4-3 5 5 0 0 0-4-8Z" /></>,
   book: <><path d="M4 5.5C6.5 4.5 9.5 4.5 12 6v13c-2.5-1.5-5.5-1.5-8-.5Z" /><path d="M20 5.5C17.5 4.5 14.5 4.5 12 6v13c2.5-1.5 5.5-1.5 8-.5Z" /></>,
   bed: <path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" />,
   no: <><circle cx="12" cy="12" r="8.5" /><path d="m6 6 12 12" /></>,
+  lock: <><rect x="5" y="11" width="14" height="9" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></>,
+  print: <><path d="M7 9V4h10v5" /><rect x="4" y="9" width="16" height="8" rx="2" /><path d="M7 14h10v6H7Z" /></>,
+  chart: <path d="M4 20V10M10 20V4M16 20v-7M21 20H3" />,
   repeat: <><path d="M4 12a8 8 0 0 1 13.7-5.7L20 8.5" /><path d="M20 4v4.5h-4.5" /><path d="M20 12a8 8 0 0 1-13.7 5.7L4 15.5" /><path d="M4 20v-4.5h4.5" /></>,
 };
 export type IconName = keyof typeof PATHS;

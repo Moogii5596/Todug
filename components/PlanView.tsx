@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { LIKES, ROUTINES, STAGES, UNITS, buildPlan, fill, type Like, type Profile, type Unit, type UnitContent } from "@/lib/engine";
+import { LIKES, ROUTINES, STAGES, UNITS, buildPlan, fill, type Like, type Profile, type Unit, type UnitContent, type UnitPreview } from "@/lib/engine";
 import { ageText } from "@/lib/children";
 import { getSupabase } from "@/lib/supabase";
 import Icon, { type IconName } from "@/components/Icon";
@@ -54,14 +54,24 @@ function Head({ icon, tone = "", children }: { icon: IconName; tone?: string; ch
   );
 }
 
-function Paywall({ what, freeUsed }: { what: string; freeUsed: boolean }) {
+function Paywall({ what, freeUsed, preview, v }: { what: string; freeUsed: boolean; preview?: UnitPreview; v: Like }) {
   return (
     <div className="card">
-      <h3 className="round">{what} төлбөртэй</h3>
-      <p className="muted">
+      <Head icon="lock">{what} төлбөртэй</Head>
+      {preview && (
+        <>
+          <p className="muted">Энэ долоо хоногийн арга: <b>{preview.strategy}</b>. Өдөр бүр алхам, ярианы жишээ, зөвлөгөөтэй 7 хичээл:</p>
+          <ol className="teaser">
+            {preview.days.map((d, i) => (
+              <li key={i}><span className="badge"><Icon name={d.routine} size={16} /></span><span>{fill(d.title, v)}<small>{ROUTINES[d.routine]}</small></span></li>
+            ))}
+          </ol>
+        </>
+      )}
+      <p className="muted" style={{ marginTop: 10 }}>
         {freeUsed
-          ? "Та үнэгүй долоо хоногоо өөр шатанд ашигласан байна. Бүх долоо хоногийн хичээл, нэмэлт тоглоомыг нээхийн тулд багцаа сонгоно уу."
-          : "Эхний долоо хоногийн хичээл үнэгүй. Үлдсэн долоо хоногууд болон нэмэлт тоглоомыг нээхийн тулд багцаа сонгоно уу."}
+          ? "Та үнэгүй долоо хоногоо өөр шатанд ашигласан байна. Багц авснаар бүх шатны хичээл, нэмэлт тоглоом, хэвлэх хуудас нээгдэнэ."
+          : "Эхний долоо хоногийн хичээл үнэгүй. Багц авснаар бүх шатны хичээл, нэмэлт тоглоом, хэвлэх хуудас нээгдэнэ."}
       </p>
       <Link href="/billing" className="cta" style={{ marginTop: 12 }}>Багц сонгох</Link>
     </div>
@@ -152,6 +162,14 @@ function UnitBlock({ u, unitId, weekIdx, p, childId, access, weekDone, trackable
         </div>
       </div>
 
+      {trackable && weekDone.length >= 7 && (
+        <div className="alert green"><b>Долоо хоногоо бүрэн хийлээ!</b>Доорх «Зорилго биелсний шинж»-ээ тэмдэглэж, дараагийн шат руу шилжих эсэхээ шийдээрэй.</div>
+      )}
+      {trackable && (
+        <Link href={"/children/" + childId + "/week/" + unitId} className="ghost" style={{ marginBottom: 14 }}>
+          <Icon name="print" size={18} /> Энэ долоо хоногийг хэвлэх хуудсаар харах
+        </Link>
+      )}
       <div className="alert green"><b>Урам</b>{u.cheer}</div>
       <SignCheck childId={childId} unitId={unitId} signs={u.signs} onNext={onNext} />
       <div className="alert amber"><b>Хэцүү байвал</b>{u.stuck}</div>
@@ -170,7 +188,7 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
   const [ai, setAi] = useState<{ key: string; games: Game[]; msg: string } | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
   /* Хичээлийн агуулгыг серверээс авна: төлбөргүй бол зөвхөн үнэгүй долоо хоногийнх ирнэ */
-  const [content, setContent] = useState<{ key: string; access: boolean; freeUsed: boolean; units: Record<number, UnitContent>; err: string } | null>(null);
+  const [content, setContent] = useState<{ key: string; access: boolean; freeUsed: boolean; units: Record<number, UnitContent>; preview: Record<number, UnitPreview>; err: string } | null>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
   const shownAdv = useRef(plan.advance);
 
@@ -193,9 +211,9 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
         });
         const json = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error("load");
-        if (!off) setContent({ key: contentKey, access: json.access === true, freeUsed: json.freeUsed === true, units: json.units ?? {}, err: "" });
+        if (!off) setContent({ key: contentKey, access: json.access === true, freeUsed: json.freeUsed === true, units: json.units ?? {}, preview: json.preview ?? {}, err: "" });
       } catch {
-        if (!off) setContent({ key: contentKey, access: false, freeUsed: false, units: {}, err: "Хичээлийг ачаалж чадсангүй. Хуудсаа дахин ачаална уу." });
+        if (!off) setContent({ key: contentKey, access: false, freeUsed: false, units: {}, preview: {}, err: "Хичээлийг ачаалж чадсангүй. Хуудсаа дахин ачаална уу." });
       }
     })();
     return () => { off = true; };
@@ -257,6 +275,28 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
         <div key={a.t} className={"alert " + a.lvl}><b>{a.t}</b>{a.d}</div>
       ))}
 
+      <details className="card roadmap">
+        <summary>
+          <span className="badge"><Icon name="flag" size={18} /></span>
+          <span><b className="round">Хөтөлбөрийн зураглал</b><small>{plan.seq.length} шатны {Math.min(plan.advance + 1, plan.seq.length)}-рт яваа · нийт {plan.seq.length * 7} хичээл</small></span>
+          <Icon name="chevron" size={18} />
+        </summary>
+        <ol>
+          {plan.seq.map((id, i) => {
+            const n = (done[id] ?? []).length;
+            const state = i < plan.advance ? "past" : i < plan.advance + plan.ids.length ? "now" : "next";
+            return (
+              <li key={id} className={state}>
+                <span className="dot">{n >= 7 ? <Icon name="check" size={14} /> : i + 1}</span>
+                <span><b>{UNITS[id].title}</b><small>{UNITS[id].goal}</small></span>
+                <em>{n}/7</em>
+              </li>
+            );
+          })}
+        </ol>
+        <Link href={"/children/" + childId + "/report"} className="ghost" style={{ marginTop: 12 }}><Icon name="chart" size={18} /> Ахицын тайлан харах</Link>
+      </details>
+
       <h2 className="round" style={{ fontSize: 20, margin: "26px 0 4px" }}>{Math.floor(plan.advance / 4) + 1}-р мөчлөг · долоо хоногууд</h2>
       <p className="muted" style={{ margin: 0 }}>
         Үр дүнтэй хөтөлбөрүүд 10–13 долоо хоног үргэлжилдэг тул нэг мөчлөгөөр дүгнэхгүй, гурван мөчлөг үргэлжлүүлэхийг зорино уу.
@@ -286,7 +326,8 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
               childId={childId} access={loaded.access}
               weekDone={weekDone} trackable={week !== "x"} onToggle={onToggle} onResetUnit={onResetUnit}
               onNext={week === 0 && plan.advance + 1 < plan.seq.length ? () => onAdvance(1) : undefined} />
-          : <Paywall what={week === "x" ? "Нэмэлт хичээл" : "Энэ долоо хоногийн хичээл"} freeUsed={loaded.freeUsed} />)}
+          : <Paywall what={week === "x" ? "Нэмэлт хичээл" : "Энэ долоо хоногийн хичээл"} freeUsed={loaded.freeUsed}
+              preview={loaded.preview[unitId]} v={LIKES[p.likes[0]] ?? LIKES.ball} />)}
 
       </div>
 

@@ -431,3 +431,54 @@ ul.dolist li { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 1
 .mk { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; margin-top: 2px; }
 .mk.yes { background: var(--green-soft); color: var(--green); }
 .mk.nope { background: var(--red-soft); color: var(--red); }
+
+/* Хөтөлбөрийн зураглал, түгжээтэй долоо хоногийн харагдац */
+details.roadmap { padding: 0; }
+details.roadmap > summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 14px 16px; }
+details.roadmap > summary::-webkit-details-marker { display: none; }
+details.roadmap > summary small { display: block; color: var(--muted); font-size: 13.5px; }
+details.roadmap > summary > .ico { color: var(--muted); transition: transform .2s var(--ease); }
+details.roadmap[open] > summary > .ico { transform: rotate(90deg); }
+details.roadmap > ol, details.roadmap > a { margin-left: 16px; margin-right: 16px; }
+details.roadmap > a { margin-bottom: 16px; width: auto; }
+details.roadmap ol { list-style: none; padding: 0; margin-top: 0; margin-bottom: 0; display: flex; flex-direction: column; }
+details.roadmap li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 9px 0; border-top: 1px solid var(--line); }
+details.roadmap li small { display: block; color: var(--muted); font-size: 13.5px; line-height: 1.35; }
+details.roadmap li em { font-style: normal; font-size: 13.5px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.dot { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-family: var(--round); font-weight: 700; font-size: 14px; background: var(--track); color: var(--muted); }
+li.now .dot { background: var(--blue); color: #fff; }
+li.past .dot { background: var(--green-soft); color: var(--green); }
+li.next b { font-weight: 600; }
+ol.teaser { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+ol.teaser li { display: grid; grid-template-columns: 32px minmax(0, 1fr); gap: 10px; align-items: center; font-weight: 600; }
+ol.teaser small { display: block; font-weight: 400; color: var(--muted); font-size: 13.5px; }
+
+/* Ахицын тайлан, хэвлэх хуудас */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
+.tiles > div { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-m); padding: 12px 14px; }
+.tiles b { display: block; font-size: 30px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.tiles span { color: var(--muted); font-size: 14px; }
+.bars { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; height: 150px; margin-top: 12px; }
+.bars > div { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; justify-items: center; gap: 4px; min-width: 0; }
+.bars span { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.bars i { align-self: end; width: 100%; max-width: 34px; border-radius: 6px 6px 2px 2px; background: var(--blue); }
+.bars i.zero { background: var(--track); }
+.bars small { font-size: 11.5px; color: var(--muted); }
+ul.stagerows { list-style: none; margin: 8px 0 0; padding: 0; }
+ul.stagerows li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+ul.stagerows li:first-child { border-top: 0; }
+ul.stagerows small { display: block; color: var(--muted); font-size: 13.5px; line-height: 1.35; }
+ul.stagerows .nums { text-align: right; font-variant-numeric: tabular-nums; }
+.wordline { margin: 0; overflow-wrap: anywhere; }
+.sheetday .dayhead { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; }
+.tick { width: 26px; height: 26px; border: 2px solid var(--line-strong); border-radius: 6px; }
+
+@media print {
+  header.top, footer.site, .noprint, nextjs-portal { display: none !important; }
+  html, body { background: #fff !important; }
+  .app { max-width: none; padding: 0; min-height: 0; }
+  .app > main { animation: none; }
+  .card, .tiles > div { box-shadow: none !important; break-inside: avoid; border: 1px solid #bbb; }
+  .bars i { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+  a { text-decoration: none; }
+}
