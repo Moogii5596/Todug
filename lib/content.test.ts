@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { CONTENT } from "./content";
-import { buildPlan, fill, unlockedIds, LIKES, UNITS, type Profile } from "./engine";
+import { buildPlan, fill, unlockedIds, LIKES, ROUTINES, UNITS, type Profile } from "./engine";
 
 const base: Profile = { name: "", years: 2, months: 6, sex: "boy", stage: 1, comp: "yes", flags: [], likes: ["ball"], time: 20, advance: 0 };
 
@@ -10,23 +10,49 @@ describe("lesson content", () => {
   it("has exactly one content entry per unit", () => {
     expect(CONTENT).toHaveLength(UNITS.length);
   });
-  it("every unit has 3 lessons plus daily ideas, mastery signs and a tip, none with placeholders", () => {
+  it("every unit has one strategy, 7 daily variations and its safety notes", () => {
     for (const u of CONTENT) {
-      expect(u.lessons).toHaveLength(3);
-      expect(new Set(u.lessons.map(l => l.name)).size).toBe(3);
+      expect(u.why.length).toBeGreaterThan(20);
+      expect(u.strategy.name.length).toBeGreaterThan(3);
+      expect(u.strategy.how.length).toBeGreaterThanOrEqual(2);
+      expect(u.strategy.how.length).toBeLessThanOrEqual(3);
+      expect(u.words.length).toBeGreaterThanOrEqual(3);
+      expect(u.words.length).toBeLessThanOrEqual(6);
+      expect(u.days).toHaveLength(7);
+      expect(u.cheer.length).toBeGreaterThan(20);
       expect(u.signs.length).toBeGreaterThanOrEqual(3);
-      expect(u.daily.length).toBeGreaterThanOrEqual(3);
       expect(u.stuck.length).toBeGreaterThan(20);
-      /* Эдгээр болон алхмууд дэлгэцэд fill()-гүйгээр гардаг тул орлуулагч агуулж болохгүй */
-      for (const t of [...u.signs, ...u.daily, u.stuck, ...u.lessons.flatMap(l => l.steps)]) expect(t).not.toMatch(/[{}]/);
+      expect(u.refer.length).toBeGreaterThanOrEqual(1);
+      /* Эдгээр нь дэлгэцэд fill()-гүйгээр гардаг тул орлуулагч агуулж болохгүй */
+      for (const t of [u.note ?? "", u.why, u.strategy.name, ...u.strategy.how, u.cheer, ...u.signs, u.stuck, ...u.refer])
+        expect(t).not.toMatch(/[{}]/);
     }
   });
-  it("leaves no unresolved placeholder in any lesson for any like", () => {
+  it("spreads each week over known routines and keeps the example dialogue short", () => {
+    for (const u of CONTENT) {
+      for (const d of u.days) {
+        expect(ROUTINES).toHaveProperty(d.routine);
+        expect(d.todo.length).toBeGreaterThan(20);
+        expect(d.talk.length).toBeGreaterThanOrEqual(2);
+        expect(d.talk.length).toBeLessThanOrEqual(4);
+        for (const t of d.talk) {
+          expect(["p", "c", "a", "w"]).toContain(t[0]);
+          expect(t).toHaveLength(t[0] === "w" ? 1 : 2);
+        }
+        /* Жишээ бүрд эцэг эхийн хэлэх үг байна; хүүхдээс үг шаардсан мөр байхгүй */
+        const parent = d.talk.filter(t => t[0] === "p").map(t => t[1]);
+        expect(parent.length).toBeGreaterThanOrEqual(1);
+        for (const line of parent) expect(line).not.toMatch(/хэл дээ|гэж хэл|дахиад хэл|зөв хэл/i);
+      }
+      expect(new Set(u.days.map(d => d.routine)).size).toBeGreaterThanOrEqual(4);
+    }
+  });
+  it("leaves no unresolved placeholder in any word, task or dialogue for any like", () => {
     for (const like of Object.values(LIKES)) {
-      for (const u of CONTENT) for (const l of u.lessons) {
-        for (const s of [...l.steps, ...l.talk.map(t => t[1] ?? "")]) {
+      for (const u of CONTENT) {
+        for (const s of [...u.words, ...u.days.flatMap(d => [d.todo, ...d.talk.map(t => t[1] ?? "")])]) {
           const out = fill(s, like);
-          expect(out).not.toMatch(/\{\w+\}/);
+          expect(out).not.toMatch(/[{}]/);
           const keys = [...s.matchAll(/\{(\w+)\}/g)].map(x => x[1].charAt(0).toLowerCase() + x[1].slice(1));
           for (const k of keys) expect(like).toHaveProperty(k);
         }

@@ -109,6 +109,9 @@ ol.routine li, ul.steps li { margin: 3px 0; }
   background: var(--surface); color: var(--ink); font: inherit; font-weight: 600;
 }
 .days button[aria-pressed=true] { background: var(--green); border-color: var(--green); color: #fff; }
+.days button[aria-current=true] { outline: 3px solid var(--blue); outline-offset: 2px; }
+.words { display: flex; flex-wrap: wrap; gap: 6px; }
+.words span { background: var(--blue-soft); border-radius: 999px; padding: 3px 12px; font-size: 15.5px; font-weight: 600; }
 .ghost {
   width: 100%; min-height: 50px; border-radius: 14px; cursor: pointer; font: inherit; font-weight: 600;
   background: var(--surface); color: var(--blue); border: 1.5px solid var(--blue);

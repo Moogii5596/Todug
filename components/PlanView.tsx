@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { LIKES, STAGES, UNITS, buildPlan, fill, type Like, type Profile, type Unit, type UnitContent } from "@/lib/engine";
+import { LIKES, ROUTINES, STAGES, UNITS, buildPlan, fill, type Like, type Profile, type Unit, type UnitContent } from "@/lib/engine";
 import { ageText } from "@/lib/children";
 import { getSupabase } from "@/lib/supabase";
 
@@ -23,7 +23,7 @@ function Talk({ talk, v, childName }: { talk: string[][]; v: Like; childName: st
         return (
           <div key={i} style={{ display: "contents" }}>
             <div className="cap" style={{ alignSelf: t[0] === "p" ? "flex-start" : "flex-end" }}>{t[0] === "p" ? "Та" : childName}</div>
-            {/* Агуулга нь lib/engine.ts дахь тогтмол текст тул HTML-ээр оруулахад аюулгүй */}
+            {/* Агуулга нь серверийн lib/content.ts дахь тогтмол текст тул HTML-ээр оруулахад аюулгүй */}
             <div className={"say " + t[0]} dangerouslySetInnerHTML={{ __html: fill(t[1], v) }} />
           </div>
         );
@@ -55,32 +55,70 @@ function Paywall({ what, freeUsed }: { what: string; freeUsed: boolean }) {
   );
 }
 
-function UnitBlock({ u, weekIdx, p }: { u: UnitContent; weekIdx: number; p: Profile }) {
+type BlockProps = {
+  u: UnitContent; unitId: number; weekIdx: number; p: Profile;
+  weekDone: number[]; trackable: boolean;
+  onToggle: (unit: number, day: number) => void; onResetUnit: (unit: number) => void;
+};
+
+/* Долоо хоногийн нэг арга ба 7 өдрийн хувилбар. Өдрийн товч нь тухайн өдрийн картыг нээнэ. */
+function UnitBlock({ u, unitId, weekIdx, p, weekDone, trackable, onToggle, onResetUnit }: BlockProps) {
+  const [picked, setPicked] = useState<number | null>(null);
+  /* Сонгоогүй бол эхний хийгээгүй өдөр нээгдэнэ */
+  const day = picked ?? ([1, 2, 3, 4, 5, 6, 7].find(d => !weekDone.includes(d)) ?? 7);
+  const tip = u.days[day - 1];
+  const v = LIKES[p.likes[(weekIdx + day - 1) % p.likes.length]] ?? LIKES.ball;
+  const first = LIKES[p.likes[weekIdx % p.likes.length]] ?? LIKES.ball;
+  const words = [...new Set(u.words.map(w => fill(w, first)))];
+  const isDone = weekDone.includes(day);
   return (
     <>
       {u.note && <div className="alert amber">{u.note}</div>}
-      {u.lessons.map((l, i) => {
-        const v = LIKES[p.likes[(weekIdx + i) % p.likes.length]] ?? LIKES.ball;
-        return (
-          <div className="card lesson" key={l.name}>
-            <h3 className="round">{l.name}</h3>
-            <div className="use">Хэрэглэх зүйл: {v.n}, {v.n2}</div>
-            <ul className="steps">{l.steps.map(s => <li key={s}>{s}</li>)}</ul>
-            <Talk talk={l.talk} v={v} childName={p.name || "Хүүхэд"} />
-          </div>
-        );
-      })}
       <div className="card">
-        <h3 className="round">Өдөр тутамд</h3>
-        <p className="muted">Тусгай цаг гаргахаас гадна өдрийн ажилдаа шингээвэл үр дүн нь хурдан гарна.</p>
-        <ul className="steps">{u.daily.map(s => <li key={s}>{s}</li>)}</ul>
+        <h3 className="round">Энэ долоо хоногийн арга: {u.strategy.name}</h3>
+        <p className="muted">{u.why}</p>
+        <ul className="steps">{u.strategy.how.map(s => <li key={s}>{s}</li>)}</ul>
+        <div className="use" style={{ marginTop: 12 }}>Энэ долоо хоногт олон давтах үг, хэллэг</div>
+        <div className="words">{words.map(w => <span key={w}>{w}</span>)}</div>
       </div>
+
+      <div className="card lesson">
+        <h3 className="round">Өдөр бүр нэг хэвшилд</h3>
+        <p className="muted">
+          {trackable ? weekDone.length + " / 7 өдөр хийсэн. " : ""}Нэг аргаа өдөр бүр өөр хэвшил дотор давтана. Өдрөө сонгоно уу.
+        </p>
+        <div className="days">
+          {[1, 2, 3, 4, 5, 6, 7].map(d => (
+            <button key={d} aria-pressed={weekDone.includes(d)} aria-current={d === day ? "true" : undefined}
+              aria-label={d + "-р өдөр" + (weekDone.includes(d) ? ", хийсэн" : "")} onClick={() => setPicked(d)}>{d}</button>
+          ))}
+        </div>
+        <div className="use" style={{ marginTop: 14 }}>{day}-р өдөр · {ROUTINES[tip.routine]} · {p.time} минут орчим</div>
+        <p style={{ margin: 0 }}>{fill(tip.todo, v)}</p>
+        <Talk talk={tip.talk} v={v} childName={p.name || "Хүүхэд"} />
+        {trackable && (
+          <button className={isDone ? "ghost" : "cta"} style={{ marginTop: 12 }} onClick={() => { setPicked(day); onToggle(unitId, day); }}>
+            {isDone ? "Хийгээгүй болгох" : "Хийлээ"}
+          </button>
+        )}
+        {trackable && weekDone.length > 0 && (
+          <button className="link" style={{ marginTop: 10, padding: 0 }} onClick={() => onResetUnit(unitId)}>
+            Энэ долоо хоногийг дахин эхлүүлэх
+          </button>
+        )}
+      </div>
+
+      <div className="alert green"><b>Урам</b>{u.cheer}</div>
       <div className="card">
         <h3 className="round">Зорилго биелсний шинж</h3>
-        <p className="muted">Эдгээрийн ихэнх нь ажиглагдвал дараагийн долоо хоног руу шилжинэ.</p>
+        <p className="muted">Эдгээрийн ихэнх нь ажиглагдвал дараагийн долоо хоног руу шилжинэ. Үгүй бол энэ долоо хоногоо давтана.</p>
         <ul className="steps">{u.signs.map(s => <li key={s}>{s}</li>)}</ul>
       </div>
       <div className="alert amber"><b>Хэцүү байвал</b>{u.stuck}</div>
+      <div className="card">
+        <h3 className="round">Мэргэжилтэнд хандах үе</h3>
+        <ul className="steps">{u.refer.map(s => <li key={s}>{s}</li>)}</ul>
+      </div>
     </>
   );
 }
@@ -125,8 +163,6 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
   const loaded = content?.key === contentKey ? content : null;
 
   const who = p.name || (p.sex === "boy" ? "Таны хүү" : "Таны охин");
-  const per = p.time === 10 ? 10 : p.time / 2;
-  const times = p.time === 10 ? 1 : 2;
   let week: number | "x" = sel.adv === plan.advance ? sel.tab : 0;
   if (week === "x" ? plan.extra == null : week >= plan.ids.length) week = 0;
   const unitId = week === "x" ? (plan.extra as number) : plan.ids[week];
@@ -178,17 +214,9 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
         <div key={a.t} className={"alert " + a.lvl}><b>{a.t}</b>{a.d}</div>
       ))}
 
-      <div className="card">
-        <h3 className="round">Өдөр бүр: {times} удаа, тус бүр {per} минут</h3>
-        <ol className="routine">
-          <li>2 минут: хөөс үлээх, амьтны дуу дуурайх</li>
-          <li>{per - 4} минут: тухайн долоо хоногийн нэг хичээл</li>
-          <li>2 минут: зурагтай ном эсвэл хүүхдийн дуу</li>
-        </ol>
-        <p className="muted" style={{ marginTop: 8 }}>
-          Дэлгэцээ унтрааж, шалан дээр нүүр тулж сууна. Хүүхэд нэг үг хэлбэл та нэг үг нэмж давтана.
-        </p>
-      </div>
+      <p className="muted" style={{ margin: "20px 0 0" }}>
+        {Math.floor(plan.advance / 4) + 1}-р мөчлөг (4 долоо хоног). Үр дүнтэй хөтөлбөрүүд 10–13 долоо хоног үргэлжилдэг тул нэг мөчлөгөөр дүгнэхгүй, гурван мөчлөг үргэлжлүүлэхийг зорино уу.
+      </p>
 
       <div ref={tabsRef} className="tabs" role="tablist" style={{ gridTemplateColumns: `repeat(${plan.ids.length + (plan.extra != null ? 1 : 0)}, 1fr)` }}>
         {plan.ids.map((_, i) => (
@@ -206,25 +234,10 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
         {!loaded && <p className="muted">Хичээлийг ачаалж байна…</p>}
         {loaded?.err && <p className="err" role="alert">{loaded.err}</p>}
         {loaded && !loaded.err && (loaded.units[unitId]
-          ? <UnitBlock u={loaded.units[unitId]} weekIdx={week === "x" ? 0 : plan.advance + week} p={p} />
+          ? <UnitBlock key={unitId} u={loaded.units[unitId]} unitId={unitId} weekIdx={week === "x" ? 0 : plan.advance + week} p={p}
+              weekDone={weekDone} trackable={week !== "x"} onToggle={onToggle} onResetUnit={onResetUnit} />
           : <Paywall what="Энэ долоо хоногийн хичээл" freeUsed={loaded.freeUsed} />)}
 
-        {week !== "x" && (
-          <div className="card">
-            <h3 className="round">Хийсэн өдрөө тэмдэглэ</h3>
-            <p className="muted">{weekDone.length} / 7 өдөр. Зорилго биелээгүй бол энэ долоо хоногоо давтана.</p>
-            <div className="days">
-              {[1, 2, 3, 4, 5, 6, 7].map(d => (
-                <button key={d} aria-pressed={weekDone.includes(d)} aria-label={d + "-р өдөр"} onClick={() => onToggle(unitId, d)}>{d}</button>
-              ))}
-            </div>
-            {weekDone.length > 0 && (
-              <button className="link" style={{ marginTop: 10, padding: 0 }} onClick={() => onResetUnit(unitId)}>
-                Энэ долоо хоногийг дахин эхлүүлэх
-              </button>
-            )}
-          </div>
-        )}
       </div>
 
       <div className="card">
@@ -232,19 +245,19 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
         {plan.hasNext ? (
           <>
             <p className="muted">Долоо хоног бүрийн зорилго биелсэн бол дараагийн шат руу шилжээрэй. Яарах хэрэггүй, хүүхдийнхээ хэмнэлээр явна.</p>
-            <button className="cta" style={{ marginTop: 12 }} onClick={() => onAdvance(4)}>Дараагийн 4 долоо хоног руу шилжих</button>
+            <button className="cta" style={{ marginTop: 12 }} onClick={() => onAdvance(4)}>Дараагийн мөчлөг рүү шилжих (4 долоо хоног)</button>
           </>
         ) : (
           <p className="muted">Эдгээр нь хөтөлбөрийн сүүлийн шатууд. Зорилго бүрэн биелтэл долоо хоногуудаа хэрэгцээгээрээ давтаарай.</p>
         )}
         {plan.hasPrev && (
-          <button className="ghost" style={{ marginTop: 12 }} onClick={() => onAdvance(-4)}>Өмнөх 4 долоо хоног руу буцах</button>
+          <button className="ghost" style={{ marginTop: 12 }} onClick={() => onAdvance(-4)}>Өмнөх мөчлөг рүү буцах</button>
         )}
       </div>
 
       <div className="card">
         <h3 className="round">Нэмэлт тоглоом</h3>
-        <p className="muted">Хүүхдийн тань мэдээлэлд тулгуурлан хиймэл оюунаар шинэ тоглоом зохиолгоно.</p>
+        <p className="muted">Энэ долоо хоногийн аргад тааруулан хиймэл оюунаар шинэ тоглоом зохиолгоно.</p>
         {loaded && !loaded.access ? (
           <>
             <p className="muted" style={{ marginTop: 8 }}>Нэмэлт тоглоом төлбөртэй багцад багтана.</p>
