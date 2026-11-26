@@ -1,9 +1,7 @@
-import { createClient } from "@supabase/supabase-js";
 import { LIKES, STAGES, UNITS } from "@/lib/engine";
 import { ageFromBirth } from "@/lib/children";
-import { SCHEMA } from "@/lib/supabase";
+import { userClient, UUID_RE } from "@/lib/server";
 
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const DAILY_LIMIT = 10;
 
 type Game = { name: string; steps: string[]; say?: string };
@@ -60,14 +58,13 @@ function parseGames(text: string): Game[] {
 /* Хүүхдийн мэдээлэлд тулгуурлан нэмэлт тоглоом зохионо.
    Anthropic-ийн түлхүүр зөвхөн сервер талд байна. */
 export async function POST(request: Request) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!url || !anon) return Response.json({ error: "Сервер тохируулагдаагүй байна." }, { status: 503 });
   if (!apiKey) return Response.json({ error: "Тоглоом зохиох хэсэг одоогоор идэвхгүй байна." }, { status: 503 });
 
-  const auth = request.headers.get("authorization") ?? "";
-  if (!auth.startsWith("Bearer ") || auth.length < 20) return Response.json({ error: "Нэвтэрнэ үү." }, { status: 401 });
+  // Хэрэглэгчийн токеноор уншина: RLS нь зөвхөн өөрийн хүүхдийг буцаана
+  const ctx = await userClient(request);
+  if (ctx.fail) return ctx.fail;
+  const { sb, user } = ctx;
 
   let body: { childId?: unknown; unit?: unknown } | null;
   try { body = await request.json(); } catch { return Response.json({ error: "Буруу хүсэлт." }, { status: 400 }); }
@@ -78,10 +75,9 @@ export async function POST(request: Request) {
     return Response.json({ error: "Буруу хүсэлт." }, { status: 400 });
   const unit = UNITS[unitIdx];
 
-  // Хэрэглэгчийн токеноор уншина: RLS нь зөвхөн өөрийн хүүхдийг буцаана
-  const sb = createClient(url, anon, { global: { headers: { Authorization: auth } }, auth: { persistSession: false }, db: { schema: SCHEMA } });
-  const { data: user } = await sb.auth.getUser(auth.slice(7));
-  if (!user.user) return Response.json({ error: "Нэвтэрнэ үү." }, { status: 401 });
+  // Нэмэлт тоглоом нь төлбөртэй боломж
+  const { data: access } = await sb.rpc("has_access");
+  if (access !== true) return Response.json({ error: "Нэмэлт тоглоом нь төлбөртэй багцад багтана." }, { status: 402 });
   const { data: c } = await sb.from("todug_children").select("*").eq("id", childId).maybeSingle();
   if (!c) return Response.json({ error: "Хүүхдийн мэдээлэл олдсонгүй." }, { status: 404 });
 
@@ -89,7 +85,7 @@ export async function POST(request: Request) {
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const { count, error: countError } = await sb.from("todug_game_requests")
     .select("id", { count: "exact", head: true })
-    .eq("user_id", user.user.id).gte("created_at", since);
+    .eq("user_id", user.id).gte("created_at", since);
   if (countError || count == null) {
     console.error("games route: rate limit count failed", countError);
     return Response.json({ error: "Тоглоом зохиох хэсэг түр ажиллахгүй байна. Дараа дахин оролдоно уу." }, { status: 503 });
@@ -97,7 +93,7 @@ export async function POST(request: Request) {
   if (count >= DAILY_LIMIT)
     return Response.json({ error: "Өнөөдрийн тоглоом зохиох хязгаарт хүрлээ. Маргааш дахин оролдоно уу." }, { status: 429 });
   // Загварыг дуудахаас өмнө хүсэлтийг бүртгэнэ; бүртгэж чадахгүй бол дуудахгүй
-  const { error: insertError } = await sb.from("todug_game_requests").insert({ user_id: user.user.id });
+  const { error: insertError } = await sb.from("todug_game_requests").insert({ user_id: user.id });
   if (insertError) {
     console.error("games route: rate limit insert failed", insertError);
     return Response.json({ error: "Тоглоом зохиох хэсэг түр ажиллахгүй байна. Дараа дахин оролдоно уу." }, { status: 503 });
