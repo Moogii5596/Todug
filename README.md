@@ -28,7 +28,7 @@
 
 ## Ажиллуулах
 
-1. [Supabase](https://supabase.com) дээр төсөл үүсгээд SQL Editor-т эхлээд `supabase/migrations/0001_init.sql`, дараа нь `supabase/migrations/0002_improvements.sql`-ийг ажиллуулна. Хоёуланг нь заавал ажиллуулна.
+1. [Supabase](https://supabase.com) дээр төсөл үүсгээд SQL Editor-т эхлээд `supabase/migrations/0001_init.sql`, дараа нь `supabase/migrations/0002_improvements.sql`, эцэст нь `supabase/migrations/0003_todug_schema.sql`-ийг ажиллуулна. Гурвууланг нь заавал ажиллуулна. Үүний дараа Project Settings > API > Data API хэсэгт Data API-г асааж, Exposed schemas-д `todug`-ийг нэмнэ (хүснэгтүүд `todug` schema-д байрладаг; үүнгүйгээр нэвтэрсний дараа «Ачаалж байна…» дээр гацна).
 2. Supabase > Authentication > URL Configuration > Redirect URLs хэсэгт сайтын хаягаа `/**` төгсгөлтэй нэмнэ (жишээ нь `http://localhost:3000/**`). Баталгаажуулах холбоос `/children`, нууц үг сэргээх холбоос `/reset` руу буцдаг тул энэ хоёр зам зөвшөөрөгдсөн байх ёстой.
 3. `.env.example`-ийг `.env.local` болгон хуулж, утгуудыг бөглөнө.
 4. Дараах командыг ажиллуулна:
