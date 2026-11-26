@@ -1,0 +1,333 @@
+<meta charset="utf-8">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Хэл ярианы платформын судалгаа</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Noto+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: one reading column (≈68ch) on Todug's own palette; tables break out into scrollable panels */
+:root {
+  --bg: #EEF3F8; --surface: #FFFFFF; --ink: #1D2B3A; --muted: #5A6B7D;
+  --line: #D5DEE8; --blue: #2F6FDE; --blue-soft: #E3ECFC;
+  --green: #1F8A66; --amber: #8A5A00; --amber-soft: #FFF3D6; --amber-line: #F0D48A;
+  --display: "Manrope", "Noto Sans", system-ui, sans-serif;
+  --body: "Noto Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111922; --surface: #1B2633; --ink: #E9EEF4; --muted: #9FB0C2;
+    --line: #2E3C4D; --blue: #7AA7F5; --blue-soft: #1F3152;
+    --green: #4CC79C; --amber: #FFC23D; --amber-soft: #3A2F14; --amber-line: #5C4A1C;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111922; --surface: #1B2633; --ink: #E9EEF4; --muted: #9FB0C2;
+  --line: #2E3C4D; --blue: #7AA7F5; --blue-soft: #1F3152;
+  --green: #4CC79C; --amber: #FFC23D; --amber-soft: #3A2F14; --amber-line: #5C4A1C;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: var(--body); font-size: 1rem; line-height: 1.7;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 2.5rem 4rem;
+}
+.page { max-width: 46rem; margin-inline: auto; display: flex; flex-direction: column; gap: 1.75rem; min-width: 0; }
+header { display: flex; flex-direction: column; gap: 0.9rem; }
+.eyebrow { margin: 0; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; line-height: 1.25; margin: 0; }
+h1 { font-size: clamp(1.7rem, 5vw, 2.4rem); font-weight: 800; letter-spacing: -0.01em; }
+.lead { margin: 0; font-size: 1.1rem; line-height: 1.65; }
+p { margin: 0; }
+a { color: var(--blue); text-underline-offset: 2px; overflow-wrap: anywhere; }
+a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 2px; }
+
+.notice { background: var(--amber-soft); border: 1px solid var(--amber-line); border-radius: 10px; padding: 1rem 1.15rem; font-size: 0.93rem; line-height: 1.6; }
+.notice strong:first-child { color: var(--amber); }
+
+.summary, nav { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1.25rem 1.35rem; }
+h2.plain { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.75rem; }
+.summary ul { margin: 0; padding-left: 1.15rem; display: flex; flex-direction: column; gap: 0.65rem; font-size: 0.97rem; line-height: 1.6; }
+.summary li::marker { color: var(--blue); }
+nav ol { margin: 0; padding-left: 1.3rem; display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.97rem; line-height: 1.5; }
+
+main { display: flex; flex-direction: column; gap: 1.1rem; min-width: 0; }
+main h2 { font-size: 1.5rem; font-weight: 800; margin-top: 2rem; padding-top: 1.75rem; border-top: 2px solid var(--ink); scroll-margin-top: 1rem; }
+main h3 { font-size: 1.15rem; font-weight: 700; margin-top: 1rem; color: var(--blue); }
+main strong { font-weight: 600; }
+
+.scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; min-width: 44rem; font-size: 0.88rem; line-height: 1.5; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; vertical-align: top; padding: 0.7rem 0.8rem; border-bottom: 1px solid var(--line); }
+th { font-family: var(--display); font-weight: 700; font-size: 0.8rem; background: var(--blue-soft); white-space: nowrap; }
+tbody tr:last-child td { border-bottom: 0; }
+td:first-child { font-weight: 600; }
+.pill { display: inline-block; min-width: 1.6rem; text-align: center; border-radius: 999px; padding: 0.05rem 0.5rem; font-family: var(--display); font-weight: 700; border: 1px solid var(--line); color: var(--muted); }
+.p1 .pill { background: var(--blue); border-color: var(--blue); color: var(--surface); }
+.p2 .pill { background: var(--blue-soft); border-color: var(--blue-soft); color: var(--ink); }
+
+</style>
+<div class="page">
+<header>
+<p class="eyebrow">Todug · Судалгааны тайлан · 2026.11.26</p>
+<h1>Todug агуулгаа «нэг долоо хоног – нэг арга» болгон шинэчилнэ</h1>
+<p class="lead">Гадаадад Todug-тай төстэй олон арван бүтээгдэхүүн байгаа ч тэдгээрээс хуулж авах бэлэн загвар алга: хэрэглэгчийн апп, төлбөртэй видео курсийн аль нь ч өөрийн үр дүнг хараат бус туршилтаар батлаагүй, харин нотолгоо нь бүтээгдэхүүнд биш, <strong>эцэг эхийн хариу үйлдэлд суурилсан нийтлэг аргуудад</strong> (хүүхдийн сонирхлыг дагах, хүлээх, цөөн зорилтот үгийг олон давтан загварчлах, хүүхдийн хэлснийг нэг алхмаар өргөтгөх, номоор ярилцах) оршиж байна.</p>
+</header>
+<aside class="notice">
+<p><strong>Уншигчид анхааруулах нь.</strong> Энэ судалгааны судлаачид вэб хайлт хийх боломжтой байсан ч эх сурвалжийн хуудсыг шууд нээж уншиж чадаагүй. Иймд доорх бүх тоо, үнэ, лицензийн нөхцөл нь хайлтын илэрцийн хураангуйгаас авсан мэдээлэл бөгөөд <strong>шийдвэр гаргах, орчуулах, нийтлэхээс өмнө эх хуудаснаас нь дахин шалгах ёстой</strong>. Эх сурвалжаар баталгаажсан баримтыг холбоосоор тэмдэглэсэн; судлаачдын дүгнэлт, таамаглалыг «дүгнэлт» гэж тусад нь тодотгосон. Хууль зүйн хэсэг нь хуульчийн зөвлөгөө биш.</p>
+</aside>
+<section class="summary">
+<h2 class="plain">Гол дүгнэлтүүд</h2>
+<ul><li>Эдгээр арга нь эрдэм шинжилгээний нээлттэй ном зохиолд тодорхойлогдсон тул Todug өөрийн монгол үг хэллэг, өөрийн жишээгээр чөлөөтэй зааж болно; харин Hanen-ий «OWL», «It Takes Two to Talk» зэрэг нэр, гарын авлагын эх бичвэр, Raising Children, Zero to Three, ASHA, Vroom зэрэг байгууллагын материалыг орчуулж ашиглаж болохгүй.</li><li>Мета-шинжилгээнүүд эцэг эхээр дамжуулсан интервенцийн хүүхдийн илэрхийлэх хэлд үзүүлэх нөлөөг бага-дунд (g ≈ 0.3–0.5), эцэг эхийн өөрийнх нь зан үйлд үзүүлэх нөлөөг арай том (g = 0.55) гэж тогтоосон тул хичээлийн загвар агуулгын хэмжээг биш, <strong>эцэг эх тухайн үйлдлийг өдөр бүр бодитоор хийх эсэхийг</strong> оновчлох ёстой.</li><li>Хүргэлтийн талд хамгийн сайн нотлогдсон хэв маяг бол долоо хоногт нэг ур чадвар, гурван богино мессеж (яагаад → юу хийх → урам/өргөтгөл), өдөр тутмын хэвшилд суулгасан дасгал, өөрөө тавьсан зорилго ба долоо хоногийн тайлан юм — бүгд текстэд суурилсан, видео төсөв шаардахгүй.</li><li>Үр дүнтэй хөтөлбөрүүд 10–13 долоо хоног үргэлжилдэг тул 4 долоо хоногийн төлөвлөгөөг «бүрэн эмчилгээ» бус, давтагдах мөчлөгийн нэг гэж байрлуулах нь үнэн зөв.</li><li>Монгол хэлний хүүхдийн хэл эзэмшилтийн судалгаа бараг байхгүй тул англи хэлний «хоёр үгийн холбоо» шатыг «үг + залгавар эсвэл хоёр үг» болгон өөрчлөх санал нь турк, солонгос хэлний судалгаанаас гаргасан дүгнэлт бөгөөд монгол хэл засалчаар хянуулах шаардлагатай.</li><li>Монголд 1–3 насны хэл яриа хоцорсон хүүхдийн эцэг эхэд зориулсан монгол хэлтэй дижитал бүтээгдэхүүн хайлтаар илрээгүй.</li></ul>
+</section>
+<nav aria-label="Агуулга"><h2 class="plain">Агуулга</h2><ol><li><a href="#s1">Дөрвөн төрлийн өрсөлдөгч бий, гэхдээ хэн нь ч өөрийн үр дүнг батлаагүй</a></li><li><a href="#s2">Нотолгоо бүтээгдэхүүнд биш, эцэг эхийн хариу үйлдлийн аргуудад байна</a></li><li><a href="#s3">Нотлогдсон хүргэлтийн хэв маягууд текстэд суурилсан, хямд</a></li><li><a href="#s4">Аргыг авч болно, нэр ба эх бичвэрийг авч болохгүй</a></li><li><a href="#s5">Агуулгыг шинэчлэх зөвлөмж: эхлээд бүтэц ба аюулгүй байдал, дараа нь хүргэлт</a></li><li><a href="#s6">Дүгнэлт</a></li></ol></nav>
+<main>
+
+
+
+<h2 id="s1">Дөрвөн төрлийн өрсөлдөгч бий, гэхдээ хэн нь ч өөрийн үр дүнг батлаагүй</h2>
+<p>Олон улсын зах зээл дөрвөн хэлбэрт хуваагдана. Нэгдүгээрт, хүүхэд өөрөө үздэг үе тэнгийн видео загварчлалын апп: Speech Blubs нь 25–28 сэдэвчилсэн хэсэгт бодит хүүхдүүдийг «видео загвар» болгон ашигладаг (<a target="_blank" rel="noopener" href="https://apps.apple.com/us/app/-/id1239522573">App Store</a>), Otsimo нь ам, хэл, уруулын дасгалаас авиа дуурайх, энгийн өгүүлбэр хүртэлх «Pathway»-тай (<a target="_blank" rel="noopener" href="https://otsimo.com/en/otsimo-speech-therapy-user-guide/">Otsimo user guide</a>). Хоёрдугаарт, эцэг эхэд чиглэсэн «үнэлгээ → хувийн төлөвлөгөө» хэрэгсэл — Todug-тай хамгийн ойр ангилал: Toddler Talk нь 10 орчим минутын үнэгүй үнэлгээнээс гэрийн дасгалын төлөвлөгөө гаргадаг (<a target="_blank" rel="noopener" href="https://toddlertalk.com/toddler-talk-language-program">Toddler Talk</a>), SpeakEasy нь шалгах асуултаар эхлэх түвшинг санал болгож, хэвшилд суурилсан дасгал, үг бүртгэлтэй (<a target="_blank" rel="noopener" href="https://apps.apple.com/us/app/speakeasy-home-speech-therapy/id1511838622">App Store</a>). Гуравдугаарт, хэл засалчдын хийсэн нэг удаагийн видео курс: Speech Sisters-ийн «Time to Talk» (15–36 сар; ихэнх хичээл 10 минутаас богино) (<a target="_blank" rel="noopener" href="https://www.speechsisters.com/time-to-talk">Speech Sisters</a>), Wee Talkers-ийн TalkToddler (30 орчим богино видео, 45 хуудас PDF, өдөр тутмын хэвшлийн 3 гарын авлага) (<a target="_blank" rel="noopener" href="https://www.weetalkers.com/talktoddler">Wee Talkers</a>), Raising Little Talkers (2 цаг орчим видео) (<a target="_blank" rel="noopener" href="https://www.raisinglittletalkers.com/course">Raising Little Talkers</a>), Walkie Talkie-ийн 10 долоо хоногийн курс, хэвлэх ажлын дэвтэртэй (<a target="_blank" rel="noopener" href="https://walkietalkiespeechtherapy.com/">Walkie Talkie</a>). Дөрөвдүгээрт, хэл яриа нь олон чиглэлийн нэг болдог ерөнхий хөгжлийн апп: Kinedu өдөрт 4 видео дасгалтай 7 хоногийн төлөвлөгөө гаргаж, эцэг эхийн тэмдэглэсэн хөгжлийн үе шатаар дараагийн долоо хоногийг дахин төлөвлөдөг (<a target="_blank" rel="noopener" href="https://www.kinedu.com/blog/kinedu-101">Kinedu 101</a>). Үүн дээр үнэгүй нийтийн эх сурвалж (BBC Tiny Happy People, CDC Milestone Tracker) болон эмчийн удирдлагатай үйлчилгээ (Expressable, Mable Therapy, Hanen) нэмэгдэнэ.</p>
+<div class="scroll"><table>
+<thead>
+<tr>
+<th>Бүтээгдэхүүн</th>
+<th>Хэлбэр</th>
+<th>Дараалал тогтоох зарчим</th>
+<th>Үнэ (хайлтын илэрцээр; шалгах шаардлагатай)</th>
+<th>Бүтээгдэхүүний түвшний нотолгоо</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Toddler Talk</td>
+<td>Үнэлгээ → хувийн төлөвлөгөө; «стратегийн» ба «оролцооны» хичээл</td>
+<td>Хөгжлийн шат: дохио зангаа → дуурайх → анхны үг → хоёр үг</td>
+<td>Үнэлгээ, нэг хичээл үнэгүй; төлөвлөгөө «$39-өөс» (<a target="_blank" rel="noopener" href="https://toddlertalk.com/free-lesson">эх сурвалж</a>)</td>
+<td>Олдоогүй</td>
+</tr>
+<tr>
+<td>SpeakEasy</td>
+<td>Апп; шалгах асуулт → түвшин → хэвшилд суурилсан дасгал</td>
+<td>4 орчим өргөн түвшин</td>
+<td>$27.99/сар эсвэл $159.99/жил (<a target="_blank" rel="noopener" href="https://apps.apple.com/us/app/speakeasy-home-speech-therapy/id1511838622">App Store</a>)</td>
+<td>Олдоогүй</td>
+</tr>
+<tr>
+<td>Speech Blubs</td>
+<td>Хүүхдэд чиглэсэн үе тэнгийн видео</td>
+<td>Сэдвээр, шатлалгүй</td>
+<td>7 хоногийн үнэгүй туршилт; үнэ эх сурвалжуудад зөрүүтэй (<a target="_blank" rel="noopener" href="https://help.speechblubs.com/article/56-what-is-speech-blubs">тусламжийн төв</a>)</td>
+<td>Ерөнхий ном зохиол иш татдаг; аппын туршилт олдоогүй (<a target="_blank" rel="noopener" href="https://cdn.speechblubs.com/2023/07/Design-Proof-of-Concept_compressed-1.pdf">PDF</a>)</td>
+</tr>
+<tr>
+<td>Speech Sisters / Wee Talkers / Raising Little Talkers</td>
+<td>2–2.5 цагийн видео курс + PDF</td>
+<td>Насны бүлгээр</td>
+<td>$79–99 / $97 / $297, нэг удаагийн төлбөр (<a target="_blank" rel="noopener" href="https://speech-sisters.teachable.com/p/course-bundle">1</a>, <a target="_blank" rel="noopener" href="https://www.weetalkers.com/talktoddler">2</a>, <a target="_blank" rel="noopener" href="https://www.raisinglittletalkers.com/course">3</a>)</td>
+<td>Зөвхөн хэрэглэгчийн сэтгэгдэл</td>
+</tr>
+<tr>
+<td>Teach Me To Talk (Laura Mize)</td>
+<td>Гарын авлага, подкаст, курс</td>
+<td>Үгийн өмнөх 11 ур чадвар</td>
+<td>Олдоогүй</td>
+<td>Олдоогүй (<a target="_blank" rel="noopener" href="https://teachmetotalk.com/product/lets-talk-about-talking/">эх сурвалж</a>)</td>
+</tr>
+<tr>
+<td>Kinedu</td>
+<td>Өдрийн видео дасгалын төлөвлөгөө</td>
+<td>Долоо хоног бүр дахин төлөвлөх</td>
+<td>$8.99–14.99/сар орчим (<a target="_blank" rel="noopener" href="https://apps.apple.com/us/app/kinedu-baby-development/id741277284">App Store</a>)</td>
+<td>Компанийн өөрийн мэдэгдэл; өгүүлэл олдоогүй (<a target="_blank" rel="noopener" href="https://www.kinedu.com/science">Kinedu</a>)</td>
+</tr>
+<tr>
+<td>BBC Tiny Happy People</td>
+<td>Үнэгүй богино кино, насаар</td>
+<td>Насны бүлгээр</td>
+<td>Үнэгүй</td>
+<td>Их сургуулийн RCT: видео мессеж авсан эцэг эхийн хэл ярианы хариу үйлдэл сайжирсан (<a target="_blank" rel="noopener" href="https://www.nesta.org.uk/project/bbc-tiny-happy-people-text-messaging-programme/">Nesta</a>)</td>
+</tr>
+<tr>
+<td>Hanen It Takes Two to Talk</td>
+<td>Гэрчилгээтэй хэл засалч удирдсан бүлгийн хөтөлбөр</td>
+<td>Эмчийн үнэлгээ</td>
+<td>—</td>
+<td>Санамсаргүй хуваарилалттай судалгаа (1996); тойм судалгаанууд «найдвар төрүүлэхүйц, гэхдээ холимог» гэж дүгнэсэн (<a target="_blank" rel="noopener" href="https://hanen.org/about-us/who-we-are-research/it-takes-two-to-talk-research-summary">Hanen</a>, <a target="_blank" rel="noopener" href="https://pubs.asha.org/doi/10.1044/2025_AJSLP-25-00101">AJSLP 2025</a>)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Энэ зургаас Todug-д хамаатай гурван зүйл харагдана. <strong>Үнэгүй үнэлгээ → тайлан → төлбөртэй төлөвлөгөө</strong> гэсэн хэлхээ нь стандарт болсон: Speech Blubs 20 гаруй асуултаар хувийн тайлан гаргаж, дараа нь дахин бөглүүлж ахицыг харуулдаг (<a target="_blank" rel="noopener" href="https://screensdesign.com/showcase/speech-blubs-language-therapy">screensdesign</a>); итгэл хүлээсэн бүх бүтээгдэхүүн «онош биш, мэргэжилтний үнэлгээг орлохгүй» гэсэн анхааруулга тавьдаг (<a target="_blank" rel="noopener" href="https://toddlertalk.com/blog/does-my-toddler-need-speech-therapy">Toddler Talk</a>, <a target="_blank" rel="noopener" href="https://www.cdc.gov/act-early/milestones-app/">CDC</a>). Дараагийн шатанд шилжих <strong>тодорхой шалгуур нийтэлсэн хэрэглэгчийн бүтээгдэхүүн олдоогүй</strong>; хамгийн ойр механизм нь Kinedu-гийн «дасгалын дараа хүүхэд тань үүнийг хийсэн үү?» гэсэн бичил шалгалт юм (<a target="_blank" rel="noopener" href="https://www.kinedu.com/docs/kinedu-parents-manual.html">Kinedu parents manual</a>). Мөн бараг бүгд дасгалыг өдөр тутмын хэвшилд суулгадаг.</p>
+<p>Судлаачдын дүгнэлт: уншиж чадсан эх сурвалжийн хүрээнд өрсөлдөгчдийн хэн нь ч эцэг эх–хүүхдийн бичмэл харилцан яриаг хичээлийн стандарт хэсэг болгодоггүй тул энэ нь Todug-ийн ялгарах шинж байж болно, гэхдээ жишээ хичээлүүдийг бүтнээр нь нээж чадаагүй тул батлагдаагүй. Todug-ийн 11 шатлал нь үгийн дараах талдаа (хүсэлтийн үг, үйл үг, 2–3 үг, асуулт, хүүрнэл) олдсон бүх бүтээгдэхүүнээс нарийн, харин үгийн өмнөх талдаа сул: Mize-ийн 11 ур чадвар нь орчин ба хүнд хариу үзүүлэх, тоглох, үг ойлгох, харилцаа эхлүүлэхийг тус тусад нь авч үздэг (<a target="_blank" rel="noopener" href="https://teachmetotalk.com/2021/05/26/386-prelinguistic-skill-1-teach-a-child-to-respond-and-interact-with-environmental-events/">Skill #1</a>, <a target="_blank" rel="noopener" href="https://teachmetotalk.com/2021/05/26/396-prelinguistic-skill-11-initiates-with-others/">Skill #11</a>) бол Todug үүнийг «хамтын анхаарал, ээлжлэх» гэсэн ганц шатанд шахсан. Богино загварчлах видео байхгүй нь зах зээлтэй харьцуулахад гол хоцрогдол.</p>
+<h2 id="s2">Нотолгоо бүтээгдэхүүнд биш, эцэг эхийн хариу үйлдлийн аргуудад байна</h2>
+<p>Эцэг эхээр дамжуулсан хэл ярианы интервенцийн гурван том мета-шинжилгээ ижил чиглэл заана. Roberts &amp; Kaiser (2011) 18 судалгаанд үндэслэн хүлээн авах болон илэрхийлэх хэлд эерэг, ач холбогдолтой нөлөө тогтоосон (<a target="_blank" rel="noopener" href="https://pubs.asha.org/doi/10.1044/1058-0360(2011/10-0055)">AJSLP</a>). Roberts нар (2019) 76 судалгаа, 5,848 оролцогчийг хамруулж, эцэг эхийн стратеги хэрэглээ <strong>g = 0.55</strong>-аар өссөн, хүүхдийн үр дүнгийн ерөнхий нөлөө <strong>0.33</strong> орчим гэж тайлагнасан бөгөөд аль бүрэлдэхүүн хэсэг нь үр дүнг авчирдаг нь одоогоор ялгагдаагүй гэдгийг онцолсон (<a target="_blank" rel="noopener" href="https://jamanetwork.com/journals/jamapediatrics/fullarticle/2733860">JAMA Pediatrics</a>, <a target="_blank" rel="noopener" href="https://apps.asha.org/EvidenceMaps/Articles/ArticleSummary/348af982-06b3-4189-984e-125758f85e15">ASHA Evidence Map</a>). Heidlage нар (2020) 25 RCT-д үндэслэн илэрхийлэх үгийн санд ном хамтран унших нь <strong>g = 0.37</strong>, тоглоом ба өдөр тутмын хэвшилд суулгасан интервенц <strong>g = 0.50</strong> нөлөөтэй гэж олсон (<a target="_blank" rel="noopener" href="https://dc.etsu.edu/etsu-works/9145">ETSU бичлэг</a>); ерөнхий нөлөөний тоо (0.42 эсвэл 0.27) хоёр хураангуйд өөр шошготой гарсан тул өгүүллээс нь шалгах хэрэгтэй (<a target="_blank" rel="noopener" href="https://apps.asha.org/EvidenceMaps/Articles/ArticleSummary/2df79249-9828-4a65-9c01-ff8a849e7a39">ASHA Evidence Map</a>). Cochrane-ий тойм (2003) сургагдсан эцэг эх, эмчийн хийсэн интервенцийн хооронд мэдэгдэхүйц ялгаа олоогүй (<a target="_blank" rel="noopener" href="https://www.cochrane.org/evidence/CD004110">Cochrane</a>).</p>
+<p>Хэл яриа хоцорсон хүүхдэд тусгайлан хамаарах нотолгоо цөөн зорилтот үгийг олон давтан загварчлах аргыг (focused stimulation) хамгийн тодорхой дэмждэг. Cable &amp; Domsch (2011)-ийн системчилсэн тойм «чиглэсэн өдөөлт ба ганц үгийг загварчлах» нь эдгээр хүүхдийн хэлийг сайжруулж чадна гэж дүгнэсэн (<a target="_blank" rel="noopener" href="https://informahealthcare.com/doi/full/10.3109/13682822.2010.487883">IJLCD</a>). Германы Heidelberg-ийн эцэг эхийн хөтөлбөрийн RCT-д жилийн дараа интервенцийн бүлгийн <strong>8.3%</strong>, хүлээлгийн бүлгийн <strong>26.1%</strong> нь хэлний өвөрмөц эмгэгийн шалгуурт нийцсэн (<a target="_blank" rel="noopener" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC2614563/">Buschmann нар 2009</a>) — «хүлээгээд үзье» гэдэг нь хүн бүрт хоргүй сонголт биш гэдгийг энэ харуулна. Enhanced Milieu Teaching-ийн RCT (97 хүүхэд, 24–42 сар) интервенцийн дараа шууд хүлээн авах хэлд ахиц үзүүлсэн (<a target="_blank" rel="noopener" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4379460">Roberts &amp; Kaiser 2015</a>). Ярилцан унших аргын мета-шинжилгээ илэрхийлэх үгийн санд d = 0.59 гэсэн (<a target="_blank" rel="noopener" href="https://scholarlypublications.universiteitleiden.nl/access/item:2899524/view">Mol нар 2008</a>). Үг холбох шатны хувьд эцэг эхээр дамжуулсан шууд RCT нотолгоо нимгэн: «toy talk» арга эцэг эхийн ярианд нэр үгэн өгүүлэгдэхүүнтэй өгүүлбэрийг найдвартай нэмэгдүүлж, энэ оролтын шинж нь хүүхдийн өгүүлбэрийн олон янз байдлыг таамагласан ч интервенцийн бүлэг өөрөө хяналтын бүлгээс давсан нь батлагдаагүй (<a target="_blank" rel="noopener" href="https://pubs.asha.org/doi/10.1044/2017_JSLHR-L-17-0008">Hadley нар 2017</a>). Хамтын анхаарлын шатанд JASPER-ийн эцэг эхийн 10 долоо хоногийн дасгалжуулалт хамтын оролцоог сайжруулсан бөгөөд эцэг эх хүүхдийн хэмнэлийг дагах нь энэ нөлөөг зуучилсан (<a target="_blank" rel="noopener" href="https://escholarship.org/uc/item/33h1z7ks">Kasari нар 2015</a>, <a target="_blank" rel="noopener" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8320675">PMC8320675</a>).</p>
+<h3>Үр дүнтэй хөтөлбөр 10–13 долоо хоног үргэлжилж, эцэг эхэд өөрийнх нь харилцааны талаар санал өгдөг</h3>
+<p>Тун хэмжээний талаарх баримт Todug-ийн 4 долоо хоногийн бүтцэд шууд хамаатай. Hanen ITTT найман бүлгийн хичээл, гурван ганцаарчилсан видео санал хүсэлтийн уулзалттай (<a target="_blank" rel="noopener" href="https://www.ucl.ac.uk/educational-psychology/resources/CS1Bird22-25.pdf">UCL тойм</a>); Heidelberg-ийн хөтөлбөр 3 сар; JASPER 10 долоо хоног. Эсрэгээр, 18 сартайдаа үгийн сан багатай байсан хүүхдийн эцэг эхэд зургаан удаагийн бүлгийн хичээл өгсөн Let's Learn Language туршилт 3 настайд хэлний ялгаа гаргаагүй (<a target="_blank" rel="noopener" href="https://www.doi.org/10.1136/BMJ.D4741">Wake нар 2011, BMJ</a>), долоо хоногт 1 цагийн 12 долоо хоногийн P-ESDM ч эцэг эх, хүүхдийн аль алинд нөлөө үзүүлээгүй (<a target="_blank" rel="noopener" href="https://pubmed.ncbi.nlm.nih.gov/23021480/">PubMed</a>). Нэг хичээл доторх давталтын тухайд VAULT судалгаа 3 үгийг тус бүр 90 удаа, эсвэл 6 үгийг тус бүр 45 удаа загварчлахыг харьцуулаад ялгаа олоогүй тул үгийн тоо, давталтын тоонд уян хатан хандаж болно гэж дүгнэсэн (<a target="_blank" rel="noopener" href="https://pubs.asha.org/doi/10.1044/2019_JSLHR-19-00219">Alt нар 2020</a>); Hanen-ий Target Word хөтөлбөрт хүүхэд бүрд 10 зорилтот үг сонгодог (<a target="_blank" rel="noopener" href="https://hanen.org/programs/tw">Hanen</a>).</p>
+<p>Судлаачдын дүгнэлт: 4 долоо хоног нь олдсон бүх үр дүнтэй хөтөлбөрөөс богино тул гурван мөчлөг нь 12 долоо хоногийн жишигт ойртоно. Үр дүнтэй ба үр дүнгүй туршилтыг ялгаж буй зүйл нь эцэг эхийн өөрийн харилцаанд өгөх ганцаарчилсан санал хүсэлт ба хангалттай хугацаа бололтой; бие даан суралцах вэб бүтээгдэхүүнд дасгалжуулагч байхгүй тул өөрийгөө үнэлэх хуудас, долоо хоногийн ганц зорилго, жишээ харилцан яриа нь хамгийн ойрын орлуулалт болно. Бүрэн бие даасан дижитал хувилбарыг дасгалжуулагчтай хувилбартай харьцуулсан судалгаа олдоогүй. «Гэртээ өдөрт хэдэн минут» гэсэн асуултад туршилтаас гаргасан хариулт байхгүй.</p>
+<h3>Дэмжигдээгүй дөрвөн зөвлөгөөг агуулгаас хасах хэрэгтэй</h3>
+<p>Томчуудын «цахилгаан мэдээний» хэв маягийн, дүрмийн хэлбэргүй тайрсан яриаг дэмжих судалгаа байхгүй: van Kleeck нарын тойм үүнийг эмнэлзүйд хэрэглэхийг зөвтгөх боломжгүй гэж дүгнэсэн (<a target="_blank" rel="noopener" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7225012">PMC7225012</a>), Venker нар (2015) эцэг эхийн ийм яриа өндөр байх нь хоёр жилийн дараах хүүхдийн хэлний сул хөгжилтэй холбоотой гэж олсон (<a target="_blank" rel="noopener" href="https://lingolab.msu.edu/research/publications1/Venker_etal_2015_Parent%20Telegraphic%20Speech.pdf">Venker нар</a>). Дэлгэцийн хугацааны тухайд 42 судалгааны мета-шинжилгээ бага хэмжээний сөрөг хамаарал (r = −0.14) олсон ч бүгд ажиглалтын судалгаа бөгөөд чанартай агуулга, хамт үзэх нь эерэг хамааралтай байсан (<a target="_blank" rel="noopener" href="https://pubmed.ncbi.nlm.nih.gov/32202633/">Madigan нар 2020</a>) — үнэн зөв мессеж нь «дэлгэц шалтгаална» биш, «дэлгэц амьд харилцааг шахан зайлуулна». Гэрийн авиа засах дасгалын нотолгоо зөвхөн хэл засалчийн үнэлгээний дараа өгсөн даалгаврын хүрээнд судлагдсан бөгөөд эцэг эх юу хийснийг ихэнх судалгаа тодорхой тайлагнаагүй (<a target="_blank" rel="noopener" href="https://dc.etsu.edu/etsu-works/1996">Sugden нар 2016</a>, <a target="_blank" rel="noopener" href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10773357/">PMC10773357</a>). «Наад үгээ хэл» гэж шаардах, хүссэн зүйлийг нь хэлтэл өгөхгүй байх, зурагт карт ашиглах зэргийг шууд шалгасан туршилт энэ судалгаанд олдоогүй; судлаачдын дүгнэлтээр, үр дүнтэй хөтөлбөрүүдийн аль нь ч албадан дуурайлгахад тулгуурладаггүй тул «загварчил, хүлээ; хэлээгүй ч зүйлийг нь өг» гэсэн дүрэм хамгаалагдахуйц юм. Зурагт картын тухайд «хортой нь батлагдсан» биш, «нотолгоо байхгүй» гэж ойлгоно.</p>
+<h2 id="s3">Нотлогдсон хүргэлтийн хэв маягууд текстэд суурилсан, хямд</h2>
+<p>Эцэг эхийг өдөр бүр үйлдэл хийлгэх талаар хамгийн сайн нотлогдсон хэлбэр нь апп доторх хичээл биш, богино мессеж юм. Ready4K хөтөлбөр долоо хоног бүр нэг ур чадварт гурван мессеж илгээдэг: итгэл үнэмшил төрүүлэх «FACT», хэвшил дотор хийх нэг тодорхой үйлдлийн «TIP», урам ба өргөтгөлийн «GROWTH» (<a target="_blank" rel="noopener" href="https://www.nber.org/papers/w20659.pdf">NBER w20659</a>). Туршилтаар эцэг эхийн оролцоо <strong>0.15–0.29 SD</strong>, хүүхдийн бичиг үсгийн өмнөх чадвар <strong>0.11 SD</strong> орчим өссөн (<a target="_blank" rel="noopener" href="https://jhr.uwpress.org/content/54/3/537.full.pdf">York, Loeb &amp; Doss 2019</a>). Тунгийн туршилт долоо хоногт нэг мессеж хоцрогдолтой хүүхдэд хүрэлцээгүй, тав нь гурваас илүү үр дүн өгөөгүй гэж олсон (<a target="_blank" rel="noopener" href="https://www.iza.org/publications/dp/11669/imprint">IZA DP 11669</a>); мессеж олширч, төвөгтэй болох тусам татгалзах хүн нэмэгдэж, харин агуулга тайлбар ба урам нэмэхэд буурсан (<a target="_blank" rel="noopener" href="https://annenberg.brown.edu/publications/its-too-annoying-who-drops-out-educational-text-messaging-programs-and-why">Annenberg</a>). Чикагогийн PACT туршилтад эцэг эх долоо хоногийн зорилгоо өөрөө тавьж, өдөр бүр сануулга, долоо хоногийн эцэст «зорилго ба бодит» харьцуулалт авахад зургаан долоо хоногт <strong>88.3 минутаар</strong> илүү ном уншсан нь хяналтын бүлгээс хоёр дахин их (<a target="_blank" rel="noopener" href="https://www.povertyactionlab.org/node/2124">J-PAL</a>, <a target="_blank" rel="noopener" href="https://www.nber.org/papers/w21602.pdf">NBER w21602</a>). Эдгээр нь бичиг үсэг, ном уншлагын салбарын үр дүн бөгөөд хэл яриа хоцорсон хүүхдэд шууд шилжих эсэх нь шалгагдаагүй.</p>
+<p>Эсрэг жишээ ч сургамжтай. Тоглоомын сан бүхий EasyPeasy аппын 1,500 орчим хүүхэд хамруулсан хараат бус туршилт хэлний нийлмэл оноонд нэмэлт ахиц олоогүй (<a target="_blank" rel="noopener" href="https://educationendowmentfoundation.org.uk/projects-and-evaluation/projects/easypeasy-learning-through-play">EEF</a>); мессенжерийн чатботоор хүргэдэг ParentText-д оролцоо гол саад болж, хэрэглэгчид материалыг дуустал үзэлгүй гардаг, 2026 оны судалгаа мессежийн ачаалал өндөр байхыг саадуудын нэг гэж нэрлэсэн (<a target="_blank" rel="noopener" href="https://www.spi.ox.ac.uk/parenttext-optimisation-evaluation-south-africa">Oxford DSPI</a>, <a target="_blank" rel="noopener" href="https://www.psy.ox.ac.uk/publication/2447695">Oxford</a>). Мянга мянган видеотой Kinedu, BabySparks, Lovevery-ийн хувьд хараат бус үр дүн, хэрэглэгч хадгалалтын өгөгдөл олдоогүй, BabySparks-ийн хэрэглэгчид өдөрт 5 дасгал шаарддагт гомдоллодог (<a target="_blank" rel="noopener" href="https://apps.apple.com/us/app/babysparks-development-app/id794574199">App Store</a>). Судлаачдын дүгнэлт: саад нь агуулгын чанар биш, хүргэлт, цаг хугацаа, санал хүсэлт; хамгийн их хөрөнгө шаарддаг хэв маягууд (видео сан, техник хэрэгсэл) нь хамгийн сул нотолгоотой.</p>
+<p>Ахиц харуулах механикийн хувьд төрлүүдийг хооронд нь харьцуулсан судалгаа алга. Эмч, судлаачдын бодитоор ашигладаг хэрэгсэл нь эцэг эхийн бөглөдөг үгийн сангийн жагсаалт (MacArthur-Bates CDI) бөгөөд монгол (халх) хувилбар 2023 оны баримтаар боловсруулалтын шатанд, норм ба хүчинтэй байдлын нотолгоогүй, тараагдаагүй байсан (<a target="_blank" rel="noopener" href="https://mb-cdi.stanford.edu/documents/Info2023-Mongolian.pdf">Stanford MB-CDI</a>). CDC-ийн апп хөгжлийн үе шатны хураангуйг эмчид илгээх боломж, «Хэзээ эрт арга хэмжээ авах вэ» хэсэгтэй (<a target="_blank" rel="noopener" href="https://www.cdc.gov/act-early/milestones-app/">CDC</a>). Тасралтгүй өдрийн тоолуур (streak) идэвхжүүлдэг ч тасрах үед урам хугалж, зан үйлээс холдуулдаг гэж судалгаа харуулсан (<a target="_blank" rel="noopener" href="https://www.psychologytoday.com/us/blog/ulterior-motives/202306/how-broken-streaks-sap-motivation">Psychology Today-н тойм</a>). Судлаачдын дүгнэлт: хэл ярианд хамгийн ойлгомжтой ахицын баримт нь «миний хүүхдийн хэлдэг/ойлгодог үгс» гэсэн өсөн нэмэгдэх жагсаалт; ахиц удаан байх үед эцэг эхэд ялалт өгөхийн тулд түүнийг хүчин чармайлтын хэмжүүртэй (өөрийн зорилгын эсрэг дадлага хийсэн өдөр) хослуулна; норм байхгүй тул үүнийг скрининг оноо биш, хувийн бүртгэл гэж танилцуулна.</p>
+<p>Үнийн загварын хувьд Todug-ийн «эхний долоо хоног үнэгүй» нь Speech Blubs, Otsimo-гийн 7 хоногийн бүрэн туршилттай ижил бөгөөд зах зээлд нийцнэ. Харьцуулах хамгийн ойр зах зээл нь сарын захиалгат хүүхдийн апп биш, нэг удаагийн төлбөртэй хэл яриа хоцролтын курс ($97–298) юм (<a target="_blank" rel="noopener" href="https://marybarbera.com/5-weeks-to-more-talking/">Mary Barbera</a>, <a target="_blank" rel="noopener" href="https://www.weetalkers.com/talktoddler">Wee Talkers</a>). Судлаачдын дүгнэлт: үнэгүй долоо хоногт мэдрэгдэхүйц ялалт авчрах хэсгүүдийг (эхлэлийн үгийн жагсаалт, хэвшилд суулгасан анхны арга, 7 дахь өдрийн тайлан) багтааж, төлбөрийн санал яг харагдахуйц ахицын дараа ирэхээр зохион байгуулна.</p>
+<h2 id="s4">Аргыг авч болно, нэр ба эх бичвэрийг авч болохгүй</h2>
+<h3>Хууль зүйн хязгаар: хоёр эх сурвалжийг л нөхцөлтэйгөөр орчуулж болно</h3>
+<p>Аргууд өөрсдөө — хүүхдийн сонирхлыг дагах, хүлээх, загварчлах, өргөтгөх, зөв хэлбэрээр давтан хэлэх, чиглэсэн өдөөлт, хугацааны завсарлага — эрдэм шинжилгээний ном зохиолд брэнд биш, нийтлэг эмчилгээний арга гэж тодорхойлогдсон (<a target="_blank" rel="noopener" href="https://informahealthcare.com/doi/full/10.3109/13682822.2010.487883">Cable &amp; Domsch 2011</a>, <a target="_blank" rel="noopener" href="https://www.researchgate.net/publication/265037755_Enhanced_Milieu_Teaching">Kaiser &amp; Hampton</a>). Хамгаалагдсан зүйл нь нэр ба эх бичвэр: «OWL» нь Hanen Early Language Program-ийн Канадад бүртгэлтэй барааны тэмдэг (2024 онд бүртгэгдсэн) (<a target="_blank" rel="noopener" href="https://ised-isde.canada.ca/cipo/trademark-search/1881398">CIPO</a>), Hanen өөрийн материалд «Observe, Wait and Listen™», «It Takes Two to Talk®», «Target Word™» гэж тэмдэглэдэг (<a target="_blank" rel="noopener" href="https://www.hanen.org/programs/for-parents/target-word.aspx">Hanen</a>). Энэ судалгаанд зөвхөн Hanen-ий OWL тэмдгийг бүртгэлээс баталгаажуулсан; бусад хөтөлбөрийн нэр, мөн Монгол болон Мадридын бүртгэл шалгагдаагүй.</p>
+<div class="scroll"><table>
+<thead>
+<tr>
+<th>Эх сурвалж</th>
+<th>Олдсон нөхцөл</th>
+<th>Todug юу хийж болох вэ</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>WHO/UNICEF Nurturing Care</td>
+<td>CC BY-NC-SA 3.0 IGO; орчуулгад «WHO/UNICEF хийгээгүй» гэсэн тайлбар заавал, лого хэрэглэхгүй (<a target="_blank" rel="noopener" href="https://nurturing-care.org/wp-content/uploads/2023/01/SA5.pdf">SA5</a>)</td>
+<td>Орчуулж болно, гэхдээ арилжааны бус, ижил лицензээр</td>
+</tr>
+<tr>
+<td>CDC «Learn the Signs. Act Early.»</td>
+<td>ActEarly@cdc.gov руу имэйлээр хүсэлт гаргаж орчуулна; CDC-г эх сурвалж гэж дурдана (<a target="_blank" rel="noopener" href="https://www.cdc.gov/act-early/resources/customization.html">CDC</a>)</td>
+<td>Хүсэлт илгээсний дараа орчуулж болно</td>
+</tr>
+<tr>
+<td>Vroom</td>
+<td>Гарын үсэгтэй лиценз; зөвхөн арилжааны бус; дасан зохицуулалтыг нийтлэхээс өмнө хянуулна (<a target="_blank" rel="noopener" href="https://toolkit.vroom.org/module-3/adaptation-limitations">Vroom toolkit</a>)</td>
+<td>Төлбөртэй бүтээгдэхүүнд тохирохгүй</td>
+</tr>
+<tr>
+<td>Harvard Center on the Developing Child</td>
+<td>Зөвшөөрлөөр; агуулгыг өөрчлөхгүй (<a target="_blank" rel="noopener" href="https://developingchild.harvard.edu/privacy/">эх сурвалж</a>)</td>
+<td>Зөвшөөрөл хүсэх; санааг өөрийн үгээр бичих</td>
+</tr>
+<tr>
+<td>Raising Children Network</td>
+<td>Бүх эрх хамгаалагдсан; богино ишлэл, холбоос л зөвшөөрнө (<a target="_blank" rel="noopener" href="https://raisingchildren.net.au/about-us/media/FAQs-about-content-reuse">FAQ</a>)</td>
+<td>Орчуулахгүй</td>
+</tr>
+<tr>
+<td>Zero to Three, ASHA, Hanen, First Words Project, UNICEF Parenting</td>
+<td>Бичгээр урьдчилсан зөвшөөрөл (<a target="_blank" rel="noopener" href="https://www.zerotothree.org/reprints-permissions">Zero to Three</a>, <a target="_blank" rel="noopener" href="https://www.asha.org/sitehelp/copyright/">ASHA</a>, <a target="_blank" rel="noopener" href="https://hanen.org/Terms-of-Use">Hanen</a>, <a target="_blank" rel="noopener" href="https://www.unicef.org/legal">UNICEF</a>)</td>
+<td>Орчуулахгүй; иш татаж, өөрийн үгээр бичих</td>
+</tr>
+<tr>
+<td>MacArthur-Bates CDI</td>
+<td>Шинэ хувилбарт CDI Advisory Board-ын зөвшөөрөл, нормчлолын төлөвлөгөө (<a target="_blank" rel="noopener" href="https://mb-cdi.stanford.edu/documents/Revision%20to%20Adaptation%20Guidelines%202024.pdf">удирдамж</a>)</td>
+<td>CDI нэр хэрэглэхгүй; нормгүй хувийн үгийн жагсаалт</td>
+</tr>
+</tbody>
+</table></div>
+<p>Судлаачдын дүгнэлт (хуульчийн зөвлөгөө биш): хөгжлийн үе шатны нас нь баримт тул зохиогчийн эрхээр хамгаалагдахгүй, харин шалгах хуудасны сонголт, үг хэллэг, зохиомж хамгаалагдана — Todug үе шатуудыг өөрийн монгол үгээр бичиж, эх сурвалжийг дурдаж болно. CC BY-NC-SA-ийн «арилжааны бус» ба «ижил нөхцөлөөр түгээх» заалт нь төлбөртэй төлөвлөгөөнд бодит хязгаарлалт: ийм орчуулсан материалыг үнэгүй, тусдаа лицензтэй хэсэгт байрлуулах, эсвэл хуульчаас зөвлөгөө авах хэрэгтэй. «Хүлээх» алхамд зориулсан Todug-ийн өөрийн монгол товчлол нь барааны тэмдгээс зайлсхийгээд зогсохгүй галиглсан англи товчлолоос илүү ойлгомжтой байна.</p>
+<h3>Монгол хэлний хязгаар: дүрмийн шатлалыг англи хэлнээс хуулж болохгүй</h3>
+<p>Монгол хүүхдийн анхны үг, тийн ялгалын болон үйл үгийн залгаврын эзэмшилтийн дараалал, өгүүлбэрийн дундаж уртын талаар хэвлэгдсэн судалгаа хайлтаар олдоогүй. Авианы талд нэг том өгөгдөл бий: МУБИС-ийн судалгаа 2–5 насны 1,083 хүүхдийг шалгаж, амны урд хэсэгт үүсэх авиа эхэлж тодордог, хамгийн хэцүү авиа нь [r], [s], [ts], [sh], [dz], [dj], [ch] гэж тайлагнасан (<a target="_blank" rel="noopener" href="https://www.atlantis-press.com/proceedings/qahe-22/125979735">Batkhuyag 2022</a>); кирилл үсэгт (р, с, ц, ш, з, ж, ч) буулгасан нь судлаачдын уншилт. Цэцэрлэгийн нэг сургалтын материал р, л-ийг 5–6 насанд тавьдаг ч арга зүйгээ дурдаагүй (<a target="_blank" rel="noopener" href="http://garden-19.blogspot.com/2018/03/blog-post_93.html">эх сурвалж</a>). Халх монгол хэлний «л» нь хажуугийн шүргэх гийгүүлэгч [ɮ] бөгөөд англи, орос хэлний [l]-ээс өөр (<a target="_blank" rel="noopener" href="https://eprints.lib.hokudai.ac.jp/repo/huscap/all/84903/08_Ueta.pdf">Ueta</a>).</p>
+<p>Хэв шинжээрээ ойр хэлний судалгаа чухал дохио өгнө. Турк хүүхдүүд нэг үгийн шатандаа буюу 15 сар орчмоос нэр үгэнд тийн ялгалын залгаврыг бүтээлчээр хэрэглэдэг (<a target="_blank" rel="noopener" href="https://www.researchgate.net/publication/346833292_The_Acquisition_of_Turkish">Aksu-Koç &amp; Slobin</a>); солонгос хүүхдүүд нэг үгийн шатнаас өгүүлбэр төгсгөх залгаврыг зохистой хэрэглэдэг (<a target="_blank" rel="noopener" href="https://www.degruyterbrill.com/document/doi/10.1515/9781501504457-014/html">Choi</a>), харин тийн ялгалаар үгийн дарааллыг тайлж ойлгох чадвар 3.5 наснаас хойш гардаг (<a target="_blank" rel="noopener" href="https://www.lingref.com/bucld/43/BUCLD43-49.pdf">BUCLD 43</a>). Солонгос хэлэнд үйл үг эрт идэвхждэг гэсэн үр дүн маргаантай: бусад судалгаа нэр үг давамгайлсаар байгааг олсон (<a target="_blank" rel="noopener" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC13347766/">системчилсэн тойм</a>).</p>
+<p>Судлаачдын дүгнэлт (монгол хүүхдийн өгөгдөл биш, турк/солонгос хэлнээс ба монгол хэлний дүрмээс гаргасан): дүрмийн анхны шатыг «хоёр үгийн холбоо» биш, <strong>«үг + залгавар ЭСВЭЛ хоёр үг»</strong> гэж тодорхойлох нь зүйтэй, учир нь «аавын», «гэрт», «явъя», «байхгүй» зэрэг ганц залгавартай үг нь бүрэн дүүрэн өгүүлэмж; ахицыг үгээр биш, утгат хэсгээр (үндэс + залгавар бүр) тоолж, зөвхөн тухайн хүүхдийн өөрийн ахицыг харахад ашиглана; эрт шатны зорилтот үгэнд үйл үг, захирах ба уриалах хэлбэрийг (ав, өг, ир, явъя) нэр үгтэй хольж оруулна — «үйл үг түрүүлж гарна» гэж биш, «үйл үгийг эрт оруул» гэж; хүүрнэлийн шатанд «тэгээд» гэхээс илүү нөхцөл үйлийн хэлхээг (-аад, -ж) зорилт болгоно; эцэг эх эрт шатанд тодорхой залгавартай, хэвийн дараалалтай өгүүлбэр хэлнэ. Авиа зүйн агуулгыг англи, орос дасгалаас орчуулж болохгүй, монгол хэлэнд зориулан бичнэ. Залгаврын эзэмшилтийн дараалал монгол хэлэнд тодорхойгүй тул энэ бүхнийг монгол хэл засалч, хэл шинжлэлийн мэргэжилтнээр хянуулах шаардлагатай.</p>
+<p>Орон нутгийн нөхцөл боломж олгож байна. Монголд хэл засалч бэлтгэх албан ёсны боловсролын тогтолцоо хараахан бүрдээгүй (<a target="_blank" rel="noopener" href="https://www.unuudur.mn/a/248832">Өнөөдөр</a>); 2026 оны 11-р сард Эрүүл мэндийн яам, Хэлний бодлогын үндэсний зөвлөл хүүхдийн хэл ярианы хөгжлийг судлах, мэргэжилтэн бэлтгэх, урьдчилан сэргийлэх үзлэгт хэл ярианы үнэлгээ нэвтрүүлэх, эцэг эхэд зориулсан зөвлөмж боловсруулахаар тохирсон (<a target="_blank" rel="noopener" href="https://montsame.mn/mn/article/5-J9Q1TLqs46Fzd536tFP">Монцамэ</a>). Орон нутагт баталгаажсан скрининг хэрэгсэл болох MORBAS (0–42 сар; илэрхийлэх ба хүлээн авах хэлний тусдаа хэсэгтэй) бий (<a target="_blank" rel="noopener" href="https://pubmed.ncbi.nlm.nih.gov/25443770/">Dagvadorj нар 2015</a>). Хайлтаар олдсон монгол бүтээгдэхүүнүүд нь 3-аас дээш насны ерөнхий сургалтын апп (<a target="_blank" rel="noopener" href="https://baatar.net/songhub">Бяцхан Баатар</a>), хэвлэмэл номын цуврал (<a target="_blank" rel="noopener" href="https://www.monsudar.mn/books/view/249/">Monsudar</a>), биечлэн үйлчилдэг төвүүд; Facebook бүлэг, төлбөртэй онлайн сургалт зэрэг албан бус өрсөлдөгчид вэб хайлтад индекслэгддэггүй тул гараар шалгах хэрэгтэй. Хэвлэлд давтагддаг «4 настнуудын 25% нь хэл ярианы хөгжил муутай» гэсэн тооны анхдагч судалгаа тодорхойгүй (<a target="_blank" rel="noopener" href="https://gogo.mn/r/4389k">gogo.mn</a>) тул Todug үүнийг баримт болгон давтах ёсгүй.</p>
+<h2 id="s5">Агуулгыг шинэчлэх зөвлөмж: эхлээд бүтэц ба аюулгүй байдал, дараа нь хүргэлт</h2>
+<p>Доорх зөвлөмж нь судлаачдын нэгтгэсэн дүгнэлт бөгөөд баруун баганад тулгуурласан эх сурвалжийг заав. Хүчин чармайлтын үнэлгээ (Б – бага, Д – дунд, И – их) нь 1–3 хүний багт зориулсан таамаг.</p>
+<div class="scroll"><table>
+<thead>
+<tr>
+<th>Эрэмбэ</th>
+<th>Зөвлөмж</th>
+<th>Юуг өөрчлөх вэ</th>
+<th>Тулгуур</th>
+<th>Хүчин чармайлт</th>
+</tr>
+</thead>
+<tbody>
+<tr class="p1"><td><span class="pill">1</span></td>
+<td>Долоо хоногт нэг арга, өдөр бүр нэг бичил хувилбар</td>
+<td>Өдөр бүр 3 шинэ алхам (28 өдөрт 84 заавар) өгөхийн оронд нэг аргыг долоо хоногийн турш өөр хэвшил, өөр үгээр давтуулна</td>
+<td>Ready4K-ийн тунгийн туршилт; ParentText-ийн мессежийн ачааллын сургамж</td>
+<td>Б</td>
+</tr>
+<tr class="p1"><td><span class="pill">1</span></td>
+<td>Хичээл бүрийг «яагаад → юу хийх → урам/өргөтгөл» дарааллаар, нэрлэсэн хэвшилд суулгах</td>
+<td>1–2 өгүүлбэр учир шалтгаан; «усанд орох/хооллох/хувцаслах үед үүнийг хий» гэсэн нэг заавар; эцэг эх хэвшлээ өөрөө сонгоно</td>
+<td>FACT/TIP/GROWTH; Heidlage (хэвшил, тоглоом g = 0.50); PACT</td>
+<td>Б</td>
+</tr>
+<tr class="p1"><td><span class="pill">1</span></td>
+<td>Харилцан ярианы жишээг богиносгож, дүрмийг нь засах</td>
+<td>2–4 мөр, «жишээ» гэж тодорхой тэмдэглэнэ; эцэг эхийн үг богино боловч залгавар бүрэн; «хэл гэж шаард» гэсэн заавар байхгүй; «загварчил → хүлээ → хариу үзүүл, хэлээгүй ч өг»</td>
+<td>Телеграф ярианы судалгаа; үр дүнтэй хөтөлбөрүүдийн бүтэц (дүгнэлт)</td>
+<td>Б</td>
+</tr>
+<tr class="p1"><td><span class="pill">1</span></td>
+<td>Аюулгүй байдлын давхарга</td>
+<td>Хуудас бүрд «онош биш, хэл засалчийг орлохгүй»; мэргэжилтэнд хандах дохионы жагсаалт; эмчид үзүүлэх хураангуй. Сурвалжтай ганц шалгуур: 24 сартайд 50-аас цөөн үг эсвэл үг холбохгүй байх (<a target="_blank" rel="noopener" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7455001">Rescorla</a>); бусад дохиог хүүхдийн эмчийн удирдамжаас шалгаж оруулна</td>
+<td>CDC, Toddler Talk-ийн жишиг</td>
+<td>Б</td>
+</tr>
+<tr class="p1"><td><span class="pill">1</span></td>
+<td>Авиа засах шатыг (11) дахин бичих</td>
+<td>Авиа давтуулах дасгалыг хасаж, тод загварчлах, авиагаар тоглох, утгад нь хариулахад хязгаарлана; р, л, с, ш, з, ж, ц, ч-г «хожуу гардаг авиа» гэж тайлбарлана; байнгын ойлгомжгүй яриа, сонсголын сэжиг, ухралтыг мэргэжилтэнд чиглүүлнэ. Насны босгыг монгол хэл засалч тогтооно</td>
+<td>Sugden нар 2016; Batkhuyag 2022</td>
+<td>Д</td>
+</tr>
+<tr class="p2"><td><span class="pill">2</span></td>
+<td>Шатлалыг монгол хэлэнд тааруулах</td>
+<td>«2 үг» → «үг + залгавар эсвэл 2 үг»; үйл үгийг эрт оруулах; хүүрнэлд нөхцөл үйл; англи «анхны 50 үг»-ийг орчуулахгүй, монгол үгийн жагсаалтыг шинээр зохиох</td>
+<td>Турк, солонгос хэлний судалгаа (шууд бус; мэргэжилтний хяналт шаардлагатай)</td>
+<td>Д</td>
+</tr>
+<tr class="p2"><td><span class="pill">2</span></td>
+<td>Үгийн өмнөх шатыг задлах</td>
+<td>«Хамтын анхаарал, ээлжлэх» ганц шатыг орчин ба хүнд хариу үзүүлэх, тоглох, үг ойлгох, харилцаа эхлүүлэх гэсэн дэд зорилтуудаар баяжуулна — өөрийн үг, өөрийн бүтцээр</td>
+<td>Mize-ийн үгийн өмнөх ур чадварууд; JASPER</td>
+<td>Д</td>
+</tr>
+<tr class="p2"><td><span class="pill">2</span></td>
+<td>Долоо хоног бүр 3–6 зорилтот үг</td>
+<td>Хүүхдийн сонирхлоос сонгож, «олон янзын нөхцөлд олон удаа» давтана; тодорхой «шидэт тоо» амлахгүй</td>
+<td>VAULT; Cable &amp; Domsch; Hanen Target Word-ийн зарчим (нэрийг нь хэрэглэхгүй)</td>
+<td>Б</td>
+</tr>
+<tr class="p2"><td><span class="pill">2</span></td>
+<td>Үгийн бүртгэл + хүчин чармайлтын тайлан</td>
+<td>Өсөн нэмэгдэх «хэлдэг/ойлгодог үгс» жагсаалт (скрининг оноо биш); долоо хоногийн өөрийн зорилго ба «7-гоос X өдөр» тайлан; уучлах загвартай тоолуур; 7 дахь өдрийн тайланг төлбөрийн саналтай холбох</td>
+<td>CDI-ийн хэлбэр; PACT; streak-ийн шүүмж</td>
+<td>Б–Д</td>
+</tr>
+<tr class="p2"><td><span class="pill">2</span></td>
+<td>4 долоо хоногийг мөчлөг гэж нэрлэх</td>
+<td>«4 долоо хоногт хэлд оруулна» гэсэн амлалтаас зайлсхийж, гурван мөчлөгийг (≈12 долоо хоног) санал болгоно; шат ахих шалгуурыг ажиглагдахуйц зан үйлээр тодорхой бичнэ</td>
+<td>Үр дүнтэй хөтөлбөрийн үргэлжлэх хугацаа; Let's Learn Language-ийн тэг үр дүн</td>
+<td>Б</td>
+</tr>
+<tr class="p3"><td><span class="pill">3</span></td>
+<td>Долоо хоногт 3 сануулга</td>
+<td>Вэб мэдэгдэл эсвэл мессенжерээр «яагаад / юу хийх / яаж болов»; өдөр бүр шахахгүй. Монголд аль суваг давамгайлдгийг шалгана</td>
+<td>Ready4K; BBC–Nesta</td>
+<td>Д</td>
+</tr>
+<tr class="p3"><td><span class="pill">3</span></td>
+<td>Цөөн богино загварчлах бичлэг, дуу, шүлэг</td>
+<td>Арга тус бүрд утсаар авсан нэг богино бичлэг; монгол дуу, шүлэг, түргэн хэллэгийг агуулгын төрөл болгох. Видео сан байгуулахгүй</td>
+<td>BBC THP RCT; Wee Talkers-ийн жишээ; EasyPeasy-ийн сургамж</td>
+<td>Д–И</td>
+</tr>
+<tr class="p3"><td><span class="pill">3</span></td>
+<td>Нэр бүхий монгол хэл засалчийн хяналт, жижиг туршилт</td>
+<td>Хянасан мэргэжилтний нэр, огноог нийтлэх; төлөвлөгөөний өмнө ба дараах үгийн жагсаалтаар жижиг туршилт хийх — өрсөлдөгчдөд байхгүй нотолгоо болно</td>
+<td>Өрсөлдөгчдийн нотолгооны хоосон зай</td>
+<td>Д</td>
+</tr>
+<tr class="p3"><td><span class="pill">3</span></td>
+<td>Эрх зүйн ажлууд</td>
+<td>CDC-д орчуулгын хүсэлт илгээх; монгол CDI-ийн багтай холбогдох; барааны тэмдгийн бүртгэл шалгах; CC BY-NC-SA материалыг үнэгүй хэсэгт тусгаарлах</td>
+<td>Лицензийн хүснэгт</td>
+<td>Б</td>
+</tr>
+</tbody>
+</table></div>
+<p>Хийхгүй байх зүйлс ч мөн адил тодорхой. Hanen, Raising Children, Zero to Three, ASHA, Vroom-ийн бичвэрийг орчуулах, «OWL», «It Takes Two to Talk» зэрэг нэрийг хичээлийн гарчиг, онцлог болгох, эсвэл эдгээр хөтөлбөртэй холбоотой мэт сэтгэгдэл төрүүлэхээс татгалзана. Хүүхдэд чиглэсэн дэлгэцийн тоглоом, том видео сан руу хөрөнгө оруулахгүй — эдгээр нь хамгийн үнэтэй, хамгийн сул нотолгоотой чиглэл. Эцэг эхэд тайрсан «хүүхдийн дүрэм»-ээр ярихыг, үгийг албадан давтуулахыг, хүссэн зүйлийг нь барьцаалахыг зөвлөхгүй. Нормгүй үгийн жагсаалтаар «хоцрогдолтой/хэвийн» гэсэн дүгнэлт гаргахгүй. AI тоглоом үүсгэгчийг тухайн долоо хоногийн арга, хүүхдийн сонирхол, сонгосон хэвшлээр хязгаарлаж, эмнэлгийн болон оношийн асуултад мэргэжилтэн рүү чиглүүлэх хариу өгүүлнэ: ерөнхий чатбот хүүхдийн өвчний тохиолдлын 83 орчим хувийг буруу оношилсон гэсэн судалгаа (<a target="_blank" rel="noopener" href="https://health.choc.org/should-you-use-chatgpt-for-your-childs-health/">CHOC</a>) болон хамгаалалт «алдаагүй биш» гэсэн AACAP-ийн анхааруулга (<a target="_blank" rel="noopener" href="https://www.aacap.org/AACAP/Families_and_Youth/Facts_for_Families/FFF-Guide/AI_Chatbots-148.aspx">AACAP</a>) болгоомжлох үндэс болно.</p>
+<h2 id="s6">Дүгнэлт</h2>
+<p>Энэ судалгаа Todug-ийн асуултыг «хэний агуулгыг авах вэ» гэдгээс «эцэг эхийг яаж үйлдэл хийлгэх вэ» гэдэг рүү шилжүүлж байна. Гадаадын хамгийн алдартай бүтээгдэхүүнүүд видеоны хэмжээгээр өрсөлддөг ч тэр өрсөлдөөн нотолгоогүй; нотолгоотой зүйлс нь жижиг, текстэд суурилсан, давталттай — Todug-ийн одоогийн хэлбэрт аль хэдийн ойр. Иймд агуулгын шинэчлэл нь шинэ материал нэмэх гэхээсээ илүү хасах, давтах, хэвшилд уях ажил байх ёстой.</p>
+<p>Хамгийн том тодорхойгүй зүйл бол монгол хэл өөрөө. Залгаварт суурилсан шатлал, үйл үгийг эрт оруулах санал, авианы насны хүлээлт бүгд шууд бус нотолгоонд тулгуурласан бөгөөд монгол хэл засалчийн хяналт, цаашлаад Todug-ийн өөрийн хэрэглэгчдийн өгөгдлөөр л шалгагдана. Төрөөс хүүхдийн хэл ярианы үнэлгээ, эцэг эхийн зөвлөмжийг дөнгөж боловсруулж эхэлж буй энэ үед үгийн бүртгэлийн нэргүйжүүлсэн өгөгдөл, жижиг туршилтын үр дүн нь Todug-ийг зөвхөн бүтээгдэхүүн биш, монгол хүүхдийн хэл эзэмшилтийн мэдлэгийн анхны эх сурвалжуудын нэг болгож чадна. Үүнээс өмнө энэ тайлан дахь тоо, үнэ, лицензийн нөхцөл бүрийг эх хуудаснаас нь шалгах нь эхний ажил.</p>
+</main>
+</div>
