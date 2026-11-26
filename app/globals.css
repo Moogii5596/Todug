@@ -149,3 +149,9 @@ h1.page { font-size: 26px; line-height: 1.2; margin: 0 0 14px; }
 .doc ul { margin: 0 0 10px; padding-left: 22px; }
 .doc li { margin: 4px 0; }
 .ghost.danger:disabled { opacity: .6; }
+
+/* блог */
+a.post { display: block; text-decoration: none; color: var(--ink); }
+a.post h2 { color: var(--blue); }
+.doc ol { margin: 0 0 10px; padding-left: 22px; }
+.doc a:not(.cta):not(.ghost) { color: var(--blue); }

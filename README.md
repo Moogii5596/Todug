@@ -55,9 +55,13 @@ npm test
 3. Supabase > Authentication > URL Configuration > Redirect URLs хэсэгт сайтын хаягаа `/**` төгсгөлтэй нэмнэ (`/children`, `/reset` хоёулаа хамрагдана).
 4. `NEXT_PUBLIC_OAUTH_PROVIDERS=google,facebook` гэж тохируулаад дахин байршуулна.
 
+## Блог
+
+Нийтлэлүүд `lib/blog.ts` дотор байна. Шинэ нийтлэл нэмэхдээ `POSTS`-д нэг объект нэмэхэд `/blog`, `/blog/[slug]`, sitemap-д автоматаар орно. Агуулгыг хэл засалчаар хянуулна.
+
 ## Хайлтын системд бүртгүүлэх
 
-Сайт `/robots.txt`, `/sitemap.xml`-ийг өөрөө гаргана. Нүүр болон `/privacy` л хайлтад орно; нэвтэрсний дараах хуудсууд `noindex`.
+Сайт `/robots.txt`, `/sitemap.xml`-ийг өөрөө гаргана. Нүүр, `/blog`, `/privacy` хайлтад орно; нэвтэрсний дараах хуудсууд `noindex`.
 
 1. Өөрийн домэйн холбосон бол Vercel дээр `NEXT_PUBLIC_SITE_URL=https://таны-домэйн` гэж тохируулна. Хоосон бол Vercel-ийн үндсэн домэйныг авна.
 2. [Google Search Console](https://search.google.com/search-console) дээр сайтаа "URL prefix" төрлөөр нэмж, "HTML tag" аргыг сонгоно. `content="..."` доторх кодыг `GOOGLE_SITE_VERIFICATION` хувьсагчид хийж дахин байршуулаад Verify дарна.

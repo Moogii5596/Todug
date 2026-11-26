@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { POSTS } from "@/lib/blog";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
@@ -39,7 +40,14 @@ export default function Home() {
 
       <Link href="/children" className="cta">Хичээл боловсруулах</Link>
       <p className="foot">Todug онош тавихгүй. Гэрийн дасгал нь хэл засалч, эмчийн үзлэгийг орлохгүй.</p>
-      <p className="foot" style={{ marginTop: 6 }}><Link href="/privacy">Нууцлалын бодлого</Link></p>
+
+      <section className="doc" style={{ marginTop: 28 }}>
+        <h2 className="round">Эцэг эхэд зориулсан зөвлөмж</h2>
+        <ul>
+          {POSTS.map(p => <li key={p.slug}><Link href={"/blog/" + p.slug}>{p.title}</Link></li>)}
+        </ul>
+      </section>
+      <p className="foot" style={{ marginTop: 6 }}><Link href="/blog">Блог</Link> · <Link href="/privacy">Нууцлалын бодлого</Link></p>
     </main>
   );
 }
