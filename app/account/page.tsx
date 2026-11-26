@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
 import { useRequireAuth } from "@/lib/useRequireAuth";
+import Reminders from "@/components/Reminders";
 
 export default function Account() {
   const router = useRouter();
@@ -45,6 +46,7 @@ export default function Account() {
         <Link href="/billing" className="ghost">Төлбөрийн хуудас</Link>
         {admin && <Link href="/admin" className="ghost" style={{ marginTop: 10 }}>Захиалгууд (админ)</Link>}
       </div>
+      <Reminders />
       <div className="card">
         <h3>Бүртгэлээ устгах</h3>
         <p className="muted">Бүртгэлээ устгахад бүх хүүхдийн профайл, тэмдэглэсэн ахиц, захиалгын түүх, төлбөртэй эрх бүрмөсөн устана. Сэргээх боломжгүй.</p>
