@@ -7,10 +7,18 @@ export type Profile = {
   advance: number;   /* дарааллын хэдэн долоо хоногийг аль хэдийн давсан */
 };
 export type Like = { label: string; n: string; n2: string; v: string; vp: string; snd: string; s3: string };
-export type Lesson = { name: string; steps: string[]; talk: string[][] };
 export type Unit = { title: string; goal: string };
-/* signs: дараагийн шат руу шилжихэд бэлэн болсны шинж; daily: өдөр тутмын ажилд шингээх санаа; stuck: ахиц удаан үед */
-export type UnitContent = { note?: string; signs: string[]; daily: string[]; stuck: string; lessons: Lesson[] };
+export type RoutineKey = "meal" | "bath" | "dress" | "play" | "out" | "book" | "bed";
+/* Нэг өдрийн бичил хувилбар: аль хэвшилд, юу хийх, ярианы богино жишээ (p = эцэг эх, c = хүүхэд, a = үйлдэл, w = хүлээх) */
+export type DayTip = { routine: RoutineKey; todo: string; talk: string[][] };
+/* Долоо хоног = нэг шат = нэг арга. why: яагаад; strategy: долоо хоногийн ганц арга; words: санал болгох зорилтот үг;
+   days: 7 өдрийн хувилбар; cheer: урам ба дараагийн алхам; signs: дараагийн шат руу шилжихэд бэлэн болсны шинж;
+   stuck: ахиц удаан үед; refer: мэргэжилтэнд хандах дохио.
+   Орлуулагч ({n}, {v} гэх мэт) зөвхөн words, todo, talk-д байж болно. */
+export type UnitContent = {
+  note?: string; why: string; strategy: { name: string; how: string[] }; words: string[];
+  days: DayTip[]; cheer: string; signs: string[]; stuck: string; refer: string[];
+};
 export type Alert = { lvl: "red" | "amber"; t: string; d: string };
 export type Plan = ReturnType<typeof buildPlan>;
 
@@ -42,25 +50,29 @@ export const LIKES: Record<string, Like> = {
   music:  { label: "Дуу хөгжим", n: "бөмбөр", n2: "хонх", v: "цохь", vp: "дуугарлаа", snd: "дүн дүн", s3: "Би бөмбөр цохино" },
   blocks: { label: "Шоо, барих тоглоом", n: "шоо", n2: "цамхаг", v: "тавь", vp: "уналаа", snd: "пад", s3: "Би цамхаг барина" }
 };
+export const ROUTINES: Record<RoutineKey, string> = {
+  meal: "Хооллох үед", bath: "Усанд орох үед", dress: "Хувцаслах үед", play: "Тоглох үед",
+  out: "Гадаа явахад", book: "Ном үзэх үед", bed: "Унтахын өмнө"
+};
 export const TIMES: Record<string, string> = { 10: "10 минут", 20: "20 минут", 30: "30 минут" };
 
 /* Хичээлийн шатуудын нэр, зорилго. Хичээлийн дэлгэрэнгүй агуулга lib/content.ts-д байх бөгөөд
    зөвхөн серверээс (/api/lessons), эрхтэй хэрэглэгчид л очно. */
 export const UNITS: Unit[] = [
   { title: "Хамт анхаарах, ээлжлэх",
-    goal: "Тантай харц тулгаж, ээлжилж тоглодог болох. Энэ нь ярианы суурь." },
+    goal: "Тантай хамт нэг зүйлд анхаарч, ээлжилж тоглодог, өөрөө харилцаа эхлүүлдэг болох. Энэ нь ярианы суурь." },
   { title: "Дуу авиа, хөдөлгөөн дуурайх",
     goal: "Таны хөдөлгөөн, дуу авиаг дуурайдаг болох." },
   { title: "Анхны үгс: нэрлэх",
-    goal: "Өдөр тутмын 10–15 зүйлийг нэрлэдэг болох." },
+    goal: "Өдөр тутмын 10–15 зүйл, үйлдлийг нэрлэдэг болох." },
   { title: "Хүсэлтийн үгс",
     goal: "\"Өг\", \"дахиад\", \"май\", \"ав\", \"үгүй\" гэж хэлж хүсэлтээ илэрхийлэх." },
   { title: "Үйл үг",
     goal: "10 орчим үйл үг хэлдэг болох: ид, уу, өг, ав, яв, суу, унт, нээ, хаа, үсэр." },
-  { title: "2 үг холбох: дахиад, байхгүй, өг",
-    goal: "\"Дахиад ___\", \"___ байхгүй\", \"___ өг\" гэж хоёр үг холбох." },
-  { title: "2 үг холбох: хэн яав, ямар, хэнийх",
-    goal: "\"Машин явлаа\", \"том бөмбөг\", \"аавын гутал\" маягийн хослол хэлэх." },
+  { title: "Үг холбох, залгах: дахиад, байхгүй, өг",
+    goal: "\"Дахиад ус\", \"бөмбөг байхгүй\" гэж хоёр үг холбох, эсвэл \"явъя\", \"аавын\" гэж үгэнд залгавар залгах." },
+  { title: "Үг холбох, залгах: хэн яав, ямар, хэнийх",
+    goal: "\"Машин явлаа\", \"том бөмбөг\", \"аавын гутал\", \"гэрт байна\" маягийн хослол хэлэх." },
   { title: "3 үгтэй өгүүлбэр",
     goal: "Хэн + юуг + яана гэсэн дарааллаар гурван үгтэй өгүүлбэр хэлэх." },
   { title: "Асуулт, хариулт",
@@ -68,7 +80,7 @@ export const UNITS: Unit[] = [
   { title: "Өгүүлэх",
     goal: "Болсон явдлыг 2–3 өгүүлбэрээр дараалуулан ярих." },
   { title: "Үгийг тод хэлэх",
-    goal: "Ам, хэлний хөдөлгөөнийг сайжруулж, үгийг тод хэлэх." }
+    goal: "Ярианы тод байдлыг тоглоомоор дэмжих: тод хэлж үзүүлэх, авиагаар тоглох." }
 ];
 const START = [0, 2, 4, 6, 7, 7];   /* ярианы түвшин бүрийн эхлэх шат */
 
@@ -130,6 +142,22 @@ export function buildPlan(p: Profile) {
 export function unlockedIds(plan: Plan, access: boolean): number[] {
   const all = plan.extra == null ? plan.ids : [...plan.ids, plan.extra];
   return access ? all : all.filter(id => id === plan.seq[0]);
+}
+
+/* ============ Ахиц хянах ============ */
+/* Долоо хоногийн тайлан: зорилго тавиагүй бол met нь null */
+export function weekRecap(done: number, goal: number | null) {
+  const d = Math.min(Math.max(Math.floor(done) || 0, 0), 7);
+  const g = goal == null || !Number.isFinite(goal) ? null : Math.min(Math.max(Math.floor(goal), 1), 7);
+  return { done: d, goal: g, met: g == null ? null : d >= g };
+}
+/* "Зорилго биелсний шинж"-ийн талаас илүү нь ажиглагдвал дараагийн шат, үгүй бол давтана */
+export function suggestNext(checked: number, total: number): "advance" | "repeat" {
+  return total > 0 && checked * 2 > total ? "advance" : "repeat";
+}
+/* Үгийн бүртгэлд хадгалах хэлбэр: захын зай авч, жижиг үсэг болгож, 30 тэмдэгтээр хязгаарлана */
+export function normWord(w: string) {
+  return w.trim().replace(/\s+/g, " ").toLowerCase().slice(0, 30).trim();
 }
 
 function cap(s: string) { return s.charAt(0).toUpperCase() + s.slice(1); }

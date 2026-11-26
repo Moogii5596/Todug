@@ -1,4 +1,5 @@
 import { LIKES, STAGES, UNITS } from "@/lib/engine";
+import { CONTENT } from "@/lib/content";
 import { ageFromBirth } from "@/lib/children";
 import { userClient, UUID_RE } from "@/lib/server";
 
@@ -74,6 +75,7 @@ export async function POST(request: Request) {
   if (typeof unitIdx !== "number" || !Number.isInteger(unitIdx) || unitIdx < 0 || unitIdx >= UNITS.length)
     return Response.json({ error: "Буруу хүсэлт." }, { status: 400 });
   const unit = UNITS[unitIdx];
+  const strategy = CONTENT[unitIdx].strategy;
 
   // Нэмэлт тоглоом нь төлбөртэй боломж
   const { data: access } = await sb.rpc("has_access");
@@ -109,8 +111,12 @@ export async function POST(request: Request) {
     `Хүүхэд: ${age.years} нас ${age.months} сар, ${c.sex === "boy" ? "хүү" : "охин"}.\n` +
     `Одоогийн яриа: ${stage}.\nДуртай зүйл: ${likes}.\n` +
     `Одоогийн хичээлийн шат: ${unit.title}.\nЭнэ шатны зорилго: ${unit.goal}\n` +
+    `Энэ долоо хоногийн арга: ${strategy.name}. ${strategy.how.join(" ")}\n` +
+    "Тоглоом бүр зөвхөн энэ аргыг өдөр тутмын хэвшил (хооллох, усанд орох, хувцаслах, тоглох, гадаа явах, ном үзэх, унтахын өмнө) дотор хэрэглэнэ. " +
+    "Эцэг эх үгийг хэлж үзүүлээд хүлээнэ: хүүхдээс үг хэлэхийг, давтахыг шаардахгүй, хэлээгүй ч хүссэнийг нь өгнө. " +
+    "Эцэг эхийн хэлэх өгүүлбэр богино боловч дүрмийн хувьд бүрэн байна. Авиа давтуулах дасгал зохиохгүй.\n" +
     "Шаардлага: гэрт байдаг аюулгүй эд зүйл ашиглана (жижиг, залгих эрсдэлтэй зүйл хэрэглэхгүй). " +
-    "Онош, эмчилгээний зөвлөгөө бичихгүй. Хүүхдийг шахахгүй, тоглоомын хэлбэртэй. " +
+    "Онош, эмчилгээ, эрүүл мэндийн зөвлөгөө бичихгүй. Хүүхдийг шахахгүй, тоглоомын хэлбэртэй. " +
     "Энгийн, зөв бичгийн дүрэмтэй монгол кирилл хэлээр, богино бич.\n" +
     'Зөвхөн JSON буцаа, өөр юу ч бичихгүй: [{"name":"...","steps":["...","...","..."],"say":"эцэг эхийн хэлэх нэг жишээ өгүүлбэр"}]';
 
