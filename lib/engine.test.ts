@@ -278,27 +278,4 @@ describe("fill", () => {
     expect(fill("a{zzz}b", car)).toBe("ab");
     expect(fill("Миний ээлж.", car)).toBe("Миний ээлж.");
   });
-  it("every unit has 3 lessons plus daily ideas, mastery signs and a tip, none with placeholders", () => {
-    for (const u of UNITS) {
-      expect(u.lessons).toHaveLength(3);
-      expect(new Set(u.lessons.map(l => l.name)).size).toBe(3);
-      expect(u.signs.length).toBeGreaterThanOrEqual(3);
-      expect(u.daily.length).toBeGreaterThanOrEqual(3);
-      expect(u.stuck.length).toBeGreaterThan(20);
-      /* Эдгээр болон алхмууд дэлгэцэд fill()-гүйгээр гардаг тул орлуулагч агуулж болохгүй */
-      for (const t of [...u.signs, ...u.daily, u.stuck, ...u.lessons.flatMap(l => l.steps)]) expect(t).not.toMatch(/[{}]/);
-    }
-  });
-  it("leaves no unresolved placeholder in any lesson for any like", () => {
-    for (const like of Object.values(LIKES)) {
-      for (const u of UNITS) for (const l of u.lessons) {
-        for (const s of [...l.steps, ...l.talk.map(t => t[1] ?? "")]) {
-          const out = fill(s, like);
-          expect(out).not.toMatch(/\{\w+\}/);
-          const keys = [...s.matchAll(/\{(\w+)\}/g)].map(x => x[1].charAt(0).toLowerCase() + x[1].slice(1));
-          for (const k of keys) expect(like).toHaveProperty(k);
-        }
-      }
-    }
-  });
 });

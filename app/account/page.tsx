@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { getSupabase } from "@/lib/supabase";
@@ -10,10 +10,16 @@ export default function Account() {
   const { session, ready } = useRequireAuth();
   const [msg, setMsg] = useState("");
   const [busy, setBusy] = useState(false);
+  const [admin, setAdmin] = useState(false);
+
+  useEffect(() => {
+    if (!ready) return;
+    getSupabase().rpc("is_admin").then(({ data }) => setAdmin(data === true));
+  }, [ready]);
 
   async function remove() {
     setMsg("");
-    if (!window.confirm("Бүртгэлээ бүрмөсөн устгах уу? Бүх хүүхдийн профайл, ахиц устана. Буцаах боломжгүй.")) return;
+    if (!window.confirm("Бүртгэлээ бүрмөсөн устгах уу? Бүх хүүхдийн профайл, ахиц, захиалга, төлбөртэй эрх устана. Буцаах боломжгүй.")) return;
     setBusy(true);
     const sb = getSupabase();
     const { error } = await sb.rpc("todug_delete_account");
@@ -34,8 +40,14 @@ export default function Account() {
         <p><Link href="/privacy">Нууцлалын бодлого</Link></p>
       </div>
       <div className="card">
+        <h3>Төлбөр</h3>
+        <p className="muted">Багц сонгох, төлбөрийн заавар, захиалгын төлөвөө харах.</p>
+        <Link href="/billing" className="ghost">Төлбөрийн хуудас</Link>
+        {admin && <Link href="/admin" className="ghost" style={{ marginTop: 10 }}>Захиалгууд (админ)</Link>}
+      </div>
+      <div className="card">
         <h3>Бүртгэлээ устгах</h3>
-        <p className="muted">Бүртгэлээ устгахад бүх хүүхдийн профайл, тэмдэглэсэн ахиц бүрмөсөн устана. Сэргээх боломжгүй.</p>
+        <p className="muted">Бүртгэлээ устгахад бүх хүүхдийн профайл, тэмдэглэсэн ахиц, захиалгын түүх, төлбөртэй эрх бүрмөсөн устана. Сэргээх боломжгүй.</p>
         {msg && <p className="err" role="alert">{msg}</p>}
         <button className="ghost danger" disabled={busy} onClick={remove}>{busy ? "Устгаж байна…" : "Бүртгэлээ устгах"}</button>
       </div>
