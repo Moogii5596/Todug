@@ -19,7 +19,7 @@ export default function Account() {
 
   async function remove() {
     setMsg("");
-    if (!window.confirm("Бүртгэлээ бүрмөсөн устгах уу? Бүх хүүхдийн профайл, ахиц, захиалга, төлбөртэй эрх устана. Буцаах боломжгүй.")) return;
+    if (!window.confirm("Бүртгэлээ бүрмөсөн устгах уу? Бүх хүүхдийн профайл, ахиц устаж, төлбөртэй эрх хаагдана. Буцаах боломжгүй.")) return;
     setBusy(true);
     const sb = getSupabase();
     const { error } = await sb.rpc("todug_delete_account");
@@ -47,7 +47,7 @@ export default function Account() {
       </div>
       <div className="card">
         <h3>Бүртгэлээ устгах</h3>
-        <p className="muted">Бүртгэлээ устгахад бүх хүүхдийн профайл, тэмдэглэсэн ахиц, захиалгын түүх, төлбөртэй эрх бүрмөсөн устана. Сэргээх боломжгүй.</p>
+        <p className="muted">Бүртгэлээ устгахад бүх хүүхдийн профайл, тэмдэглэсэн ахиц бүрмөсөн устаж, төлбөртэй эрх хаагдана. Төлсөн захиалгын бүртгэл (дугаар, дүн, огноо, имэйл) санхүүгийн тооцооны зорилгоор хадгалагдана. Сэргээх боломжгүй.</p>
         {msg && <p className="err" role="alert">{msg}</p>}
         <button className="ghost danger" disabled={busy} onClick={remove}>{busy ? "Устгаж байна…" : "Бүртгэлээ устгах"}</button>
       </div>
