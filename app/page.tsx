@@ -1,8 +1,26 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
+
+/* Хайлтын системд сайтын төрлийг ойлгуулах бүтэцлэгдсэн өгөгдөл */
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: SITE_NAME,
+  url: SITE_URL,
+  description: SITE_DESCRIPTION,
+  inLanguage: "mn",
+  applicationCategory: "EducationalApplication",
+  operatingSystem: "Web",
+  audience: { "@type": "Audience", audienceType: "Бага насны хүүхэдтэй эцэг эх" },
+};
 
 export default function Home() {
   return (
     <main>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <section className="hero">
         <h1 className="round">Хүүхдийнхээ тухай хэлээрэй, хичээлийг нь тааруулъя</h1>
         <p>Нас, одоогийн яриа, сонирхлыг нь оруулахад 4 долоо хоногийн гэрийн дасгалын төлөвлөгөө гарна.</p>
