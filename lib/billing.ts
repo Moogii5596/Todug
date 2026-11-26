@@ -1,11 +1,11 @@
 /* Todug: төлбөрийн тохиргоо ба туслах функцүүд.
    Багц, үнэ нь өгөгдлийн сангийн todug.plans хүснэгтэд байна. */
 
-/* Шилжүүлэг хүлээн авах данс. Хүлээн авагчийн нэрийг NEXT_PUBLIC_BANK_HOLDER хувьсагчаар өгнө. */
+/* Шилжүүлэг хүлээн авах данс. Хүлээн авагчийн нэрийг NEXT_PUBLIC_BANK_HOLDER хувьсагчаар сольж болно. */
 export const BANK = {
   bank: "М банк",
   account: "MN470039008734099978",
-  holder: process.env.NEXT_PUBLIC_BANK_HOLDER ?? "",
+  holder: process.env.NEXT_PUBLIC_BANK_HOLDER || "Батжаргал Мөнхбат",
 };
 
 export type PlanRow = { id: string; label: string; months: number; amount: number };

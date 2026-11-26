@@ -41,11 +41,15 @@ function UnitHead({ u }: { u: Unit }) {
   );
 }
 
-function Paywall({ what }: { what: string }) {
+function Paywall({ what, freeUsed }: { what: string; freeUsed: boolean }) {
   return (
     <div className="card">
       <h3 className="round">{what} төлбөртэй</h3>
-      <p className="muted">Эхний долоо хоногийн хичээл үнэгүй. Үлдсэн долоо хоногууд болон нэмэлт тоглоомыг нээхийн тулд багцаа сонгоно уу.</p>
+      <p className="muted">
+        {freeUsed
+          ? "Та үнэгүй долоо хоногоо өөр шатанд ашигласан байна. Бүх долоо хоногийн хичээл, нэмэлт тоглоомыг нээхийн тулд багцаа сонгоно уу."
+          : "Эхний долоо хоногийн хичээл үнэгүй. Үлдсэн долоо хоногууд болон нэмэлт тоглоомыг нээхийн тулд багцаа сонгоно уу."}
+      </p>
       <Link href="/billing" className="cta" style={{ marginTop: 12 }}>Багц сонгох</Link>
     </div>
   );
@@ -88,7 +92,7 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
   const [ai, setAi] = useState<{ key: string; games: Game[]; msg: string } | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
   /* Хичээлийн агуулгыг серверээс авна: төлбөргүй бол зөвхөн үнэгүй долоо хоногийнх ирнэ */
-  const [content, setContent] = useState<{ key: string; access: boolean; units: Record<number, UnitContent>; err: string } | null>(null);
+  const [content, setContent] = useState<{ key: string; access: boolean; freeUsed: boolean; units: Record<number, UnitContent>; err: string } | null>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
   const shownAdv = useRef(plan.advance);
 
@@ -111,9 +115,9 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
         });
         const json = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error("load");
-        if (!off) setContent({ key: contentKey, access: json.access === true, units: json.units ?? {}, err: "" });
+        if (!off) setContent({ key: contentKey, access: json.access === true, freeUsed: json.freeUsed === true, units: json.units ?? {}, err: "" });
       } catch {
-        if (!off) setContent({ key: contentKey, access: false, units: {}, err: "Хичээлийг ачаалж чадсангүй. Хуудсаа дахин ачаална уу." });
+        if (!off) setContent({ key: contentKey, access: false, freeUsed: false, units: {}, err: "Хичээлийг ачаалж чадсангүй. Хуудсаа дахин ачаална уу." });
       }
     })();
     return () => { off = true; };
@@ -203,7 +207,7 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
         {loaded?.err && <p className="err" role="alert">{loaded.err}</p>}
         {loaded && !loaded.err && (loaded.units[unitId]
           ? <UnitBlock u={loaded.units[unitId]} weekIdx={week === "x" ? 0 : plan.advance + week} p={p} />
-          : <Paywall what="Энэ долоо хоногийн хичээл" />)}
+          : <Paywall what="Энэ долоо хоногийн хичээл" freeUsed={loaded.freeUsed} />)}
 
         {week !== "x" && (
           <div className="card">

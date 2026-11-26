@@ -9,6 +9,62 @@ const FILTERS: { id: OrderStatus | "all"; label: string }[] = [
   { id: "cancelled", label: "Цуцалсан" }, { id: "all", label: "Бүгд" },
 ];
 
+/* Урилгын холбоос үүсгэнэ: имэйл илгээхгүй, холбоосыг админ өөрөө хэрэглэгчид дамжуулна */
+function Invite() {
+  const [email, setEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+  const [made, setMade] = useState<{ email: string; link: string; existing: boolean } | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    setMsg(""); setMade(null); setCopied(false); setBusy(true);
+    try {
+      const { data } = await getSupabase().auth.getSession();
+      const res = await fetch("/api/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: "Bearer " + (data.session?.access_token ?? "") },
+        body: JSON.stringify({ email }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || typeof json.link !== "string") throw new Error(json.error || "error");
+      setMade({ email: json.email, link: json.link, existing: json.existing === true });
+      setEmail("");
+    } catch (err) {
+      setMsg(err instanceof Error && err.message !== "error" ? err.message : "Урилга үүсгэж чадсангүй. Дахин оролдоно уу.");
+    }
+    setBusy(false);
+  }
+  async function copy() {
+    if (!made) return;
+    try { await navigator.clipboard.writeText(made.link); setCopied(true); } catch { /* гараар хуулна */ }
+  }
+
+  return (
+    <div className="card">
+      <h2 className="round">Урилга үүсгэх</h2>
+      <p className="muted">Имэйлээр нь нэвтрэх эрх үүсгэж, урилгын холбоос гаргана. Холбоосыг хэрэглэгчид өөрөө илгээнэ. Хэрэглэгч холбоосоор орж нууц үгээ өөрөө зохионо.</p>
+      <form onSubmit={submit} className="stack" style={{ marginTop: 10 }}>
+        <label className="f">Хэрэглэгчийн имэйл
+          <input type="email" required autoComplete="off" value={email} onChange={e => setEmail(e.target.value)} />
+        </label>
+        {msg && <p className="err" role="alert">{msg}</p>}
+        <button className="ghost" disabled={busy}>{busy ? "Үүсгэж байна…" : "Урилгын холбоос үүсгэх"}</button>
+      </form>
+      {made && (
+        <div className="alert green" style={{ marginTop: 12, marginBottom: 0 }}>
+          <b>{made.email}</b>
+          {made.existing ? "Энэ имэйл аль хэдийн бүртгэлтэй тул нууц үг тохируулах холбоос үүслээ." : "Урилгын холбоос үүслээ."}
+          {" "}Холбоос нэг удаа, богино хугацаанд хүчинтэй.
+          <div className="mono" style={{ margin: "8px 0", fontSize: 13 }}>{made.link}</div>
+          <button type="button" className="ghost" onClick={copy}>{copied ? "Хууллаа" : "Холбоос хуулах"}</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Admin() {
   const { ready } = useRequireAuth();
   const [admin, setAdmin] = useState<boolean | null>(null);
@@ -52,7 +108,9 @@ export default function Admin() {
 
   return (
     <main>
-      <h1 className="page round">Захиалгууд</h1>
+      <h1 className="page round">Админ</h1>
+      <Invite />
+      <h2 className="round" style={{ fontSize: 22, margin: "20px 0 8px" }}>Захиалгууд</h2>
       <div className="tabs" role="tablist" style={{ margin: "0 0 12px" }}>
         {FILTERS.map(f => (
           <button key={f.id} role="tab" aria-selected={filter === f.id} onClick={() => { setRows(null); setFilter(f.id); }}>{f.label}</button>

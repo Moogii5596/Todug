@@ -24,7 +24,7 @@ on conflict (id) do nothing;
 create table if not exists todug.admins (
   email text primary key check (email = lower(email))
 );
-insert into todug.admins (email) values ('mnmkbt4@gmail.com') on conflict do nothing;
+insert into todug.admins (email) values ('moogii5596@gmail.com') on conflict do nothing;
 
 -- ============ 3. Захиалга ============
 create table if not exists todug.orders (

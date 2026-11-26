@@ -21,7 +21,7 @@
 
 | Зам | Үүрэг |
 | --- | --- |
-| `app/` | Нүүр, `/login`, `/reset` (нууц үг сэргээх), `/children`, `/children/[id]`, `/account`, `/billing`, `/admin`, `/privacy`, `/api/games`, `/api/lessons` |
+| `app/` | Нүүр, `/login`, `/reset` (нууц үг сэргээх), `/children`, `/children/[id]`, `/account`, `/billing`, `/admin`, `/privacy`, `/api/games`, `/api/lessons`, `/api/invite` |
 | `components/` | Толгой, хүүхдийн маягт, төлөвлөгөөний харагдац |
 | `lib/engine.ts` | Хичээл тааруулах логик, шатуудын нэр, зорилго |
 | `lib/content.ts` | Хичээлийн дэлгэрэнгүй агуулга. Зөвхөн сервер талд (`/api/lessons`), эрхтэй хэрэглэгчид л очно |
@@ -31,7 +31,7 @@
 
 ## Ажиллуулах
 
-1. [Supabase](https://supabase.com) дээр төсөл үүсгээд SQL Editor-т эхлээд `supabase/migrations/0001_init.sql`, дараа нь `supabase/migrations/0002_improvements.sql`, `supabase/migrations/0003_todug_schema.sql`, эцэст нь `supabase/migrations/0004_billing.sql`-ийг ажиллуулна. Дөрвүүланг нь заавал ажиллуулна. Үүний дараа Project Settings > API > Data API хэсэгт Data API-г асааж, Exposed schemas-д `todug`-ийг нэмнэ (хүснэгтүүд `todug` schema-д байрладаг; үүнгүйгээр нэвтэрсний дараа «Ачаалж байна…» дээр гацна).
+1. [Supabase](https://supabase.com) дээр төсөл үүсгээд SQL Editor-т эхлээд `supabase/migrations/0001_init.sql`, дараа нь `supabase/migrations/0002_improvements.sql`, `0003_todug_schema.sql`, `0004_billing.sql`, эцэст нь `0005_free_limit_admin.sql`-ийг ажиллуулна. Тавууланг нь заавал ажиллуулна. Үүний дараа Project Settings > API > Data API хэсэгт Data API-г асааж, Exposed schemas-д `todug`-ийг нэмнэ (хүснэгтүүд `todug` schema-д байрладаг; үүнгүйгээр нэвтэрсний дараа «Ачаалж байна…» дээр гацна).
 2. Supabase > Authentication > URL Configuration > Redirect URLs хэсэгт сайтын хаягаа `/**` төгсгөлтэй нэмнэ (жишээ нь `http://localhost:3000/**`). Баталгаажуулах холбоос `/children`, нууц үг сэргээх холбоос `/reset` руу буцдаг тул энэ хоёр зам зөвшөөрөгдсөн байх ёстой.
 3. `.env.example`-ийг `.env.local` болгон хуулж, утгуудыг бөглөнө.
 4. Дараах командыг ажиллуулна:
@@ -79,5 +79,7 @@ Vercel дээр репозитороо импортлож, `.env.example` дах
 
 - **Үнэ, багц:** `todug.plans` хүснэгтэд. Өөрчлөхдөө: `update todug.plans set amount = 25000 where id = 'm1';`
 - **Админ:** `todug.admins` хүснэгтэд имэйлээр (жижиг үсгээр). Тэр имэйлээр бүртгүүлж, имэйлээ баталгаажуулсан хэрэглэгч `/admin` хуудсыг үзнэ.
-- **Хүлээн авах данс:** `lib/billing.ts`. Хүлээн авагчийн нэрийг `NEXT_PUBLIC_BANK_HOLDER` хувьсагчаар өгнө.
+- **Хүлээн авах данс:** `lib/billing.ts`. Хүлээн авагчийн нэрийг `NEXT_PUBLIC_BANK_HOLDER` хувьсагчаар сольж болно.
+- **Үнэгүй долоо хоногийн хязгаар:** нэг бүртгэлд хамгийн ихдээ 2 өөр шатыг үнэгүй нээнэ (`todug.claim_free_unit`).
+- **Урилга:** админ `/admin` хуудаснаас имэйлээр урилгын холбоос үүсгэнэ (имэйл илгээхгүй, холбоосыг өөрөө дамжуулна). Хэрэглэгч холбоосоор орж `/reset` хуудсанд нууц үгээ зохионо. Үүнд Vercel дээр `SUPABASE_SERVICE_ROLE_KEY` хувьсагч шаардлагатай.
 - **Түгжээ:** төлбөргүй хэрэглэгчид зөвхөн хөтөлбөрийн эхний долоо хоногийн агуулга серверээс очно. `lib/content.ts`-ийг клиент компонентоос импортолж болохгүй.
