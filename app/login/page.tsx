@@ -29,6 +29,9 @@ function isRate(e: AuthErr) {
 /** Supabase-ийн алдааг (code, эсвэл message) монгол мессеж болгоно */
 function explain(e: AuthErr, mode: Mode): string {
   const m = e.message ?? "";
+  // Supabase-ийн имэйл илгээх хязгаар (цагт цөөн тооны имэйл): оролдлогын тооноос өөр шалтгаан
+  if (e.code === "over_email_send_rate_limit" || /email rate limit/i.test(m))
+    return "Баталгаажуулах имэйл илгээх хязгаарт хүрлээ. 1 цагийн дараа дахин оролдоно уу.";
   if (isRate(e)) return RATE;
   if (mode === "up") {
     if (e.code === "user_already_exists" || e.code === "email_exists" || /already registered/i.test(m))
