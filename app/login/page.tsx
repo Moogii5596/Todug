@@ -35,6 +35,9 @@ function explain(e: AuthErr, mode: Mode): string {
       return "Энэ имэйл бүртгэлтэй байна. Нэвтэрнэ үү.";
     if (e.code === "weak_password" || /password should be/i.test(m))
       return "Нууц үг хэт богино эсвэл амархан байна. Өөр нууц үг сонгоно уу.";
+    // Supabase дээр "Allow new users to sign up" эсвэл Email provider унтраалттай үед
+    if (e.code === "signup_disabled" || e.code === "email_provider_disabled" || /signups not allowed/i.test(m))
+      return "Одоогоор шинэ бүртгэл хаалттай байна. Удахгүй нээгдэнэ.";
     return "Бүртгэж чадсангүй. Дахин оролдоно уу.";
   }
   if (e.code === "email_not_confirmed" || /email not confirmed/i.test(m))
