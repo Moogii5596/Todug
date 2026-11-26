@@ -23,6 +23,8 @@ export type UnitContent = {
   note?: string; why: string; strategy: { name: string; how: string[] }; avoid: string[]; words: string[];
   days: DayTip[]; cheer: string; signs: string[]; stuck: string; refer: string[];
 };
+/* Түгжээтэй долоо хоногийн урьдчилсан харагдац: аргын нэр ба өдрүүдийн гарчиг л (алхам, яриа орохгүй) */
+export type UnitPreview = { strategy: string; days: { routine: RoutineKey; title: string }[] };
 export type Alert = { lvl: "red" | "amber"; t: string; d: string };
 export type Plan = ReturnType<typeof buildPlan>;
 
