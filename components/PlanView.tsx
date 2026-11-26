@@ -48,6 +48,17 @@ function UnitBlock({ u, weekIdx, p }: { u: Unit; weekIdx: number; p: Profile }) 
           </div>
         );
       })}
+      <div className="card">
+        <h3 className="round">Өдөр тутамд</h3>
+        <p className="muted">Тусгай цаг гаргахаас гадна өдрийн ажилдаа шингээвэл үр дүн нь хурдан гарна.</p>
+        <ul className="steps">{u.daily.map(s => <li key={s}>{s}</li>)}</ul>
+      </div>
+      <div className="card">
+        <h3 className="round">Зорилго биелсний шинж</h3>
+        <p className="muted">Эдгээрийн ихэнх нь ажиглагдвал дараагийн долоо хоног руу шилжинэ.</p>
+        <ul className="steps">{u.signs.map(s => <li key={s}>{s}</li>)}</ul>
+      </div>
+      <div className="alert amber"><b>Хэцүү байвал</b>{u.stuck}</div>
     </>
   );
 }

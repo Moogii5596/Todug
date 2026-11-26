@@ -278,6 +278,17 @@ describe("fill", () => {
     expect(fill("a{zzz}b", car)).toBe("ab");
     expect(fill("Миний ээлж.", car)).toBe("Миний ээлж.");
   });
+  it("every unit has 3 lessons plus daily ideas, mastery signs and a tip, none with placeholders", () => {
+    for (const u of UNITS) {
+      expect(u.lessons).toHaveLength(3);
+      expect(new Set(u.lessons.map(l => l.name)).size).toBe(3);
+      expect(u.signs.length).toBeGreaterThanOrEqual(3);
+      expect(u.daily.length).toBeGreaterThanOrEqual(3);
+      expect(u.stuck.length).toBeGreaterThan(20);
+      /* Эдгээр болон алхмууд дэлгэцэд fill()-гүйгээр гардаг тул орлуулагч агуулж болохгүй */
+      for (const t of [...u.signs, ...u.daily, u.stuck, ...u.lessons.flatMap(l => l.steps)]) expect(t).not.toMatch(/[{}]/);
+    }
+  });
   it("leaves no unresolved placeholder in any lesson for any like", () => {
     for (const like of Object.values(LIKES)) {
       for (const u of UNITS) for (const l of u.lessons) {
