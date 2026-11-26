@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { LIKES, STAGES, UNITS, buildPlan, fill, type Like, type Profile, type Unit } from "@/lib/engine";
+import Link from "next/link";
+import { LIKES, STAGES, UNITS, buildPlan, fill, type Like, type Profile, type Unit, type UnitContent } from "@/lib/engine";
 import { ageText } from "@/lib/children";
 import { getSupabase } from "@/lib/supabase";
 
@@ -31,11 +32,32 @@ function Talk({ talk, v, childName }: { talk: string[][]; v: Like; childName: st
   );
 }
 
-function UnitBlock({ u, weekIdx, p }: { u: Unit; weekIdx: number; p: Profile }) {
+function UnitHead({ u }: { u: Unit }) {
   return (
     <>
       <h2 className="round" style={{ fontSize: 22, margin: "0 0 8px" }}>{u.title}</h2>
       <p className="goal"><b>Зорилго:</b> {u.goal}</p>
+    </>
+  );
+}
+
+function Paywall({ what, freeUsed }: { what: string; freeUsed: boolean }) {
+  return (
+    <div className="card">
+      <h3 className="round">{what} төлбөртэй</h3>
+      <p className="muted">
+        {freeUsed
+          ? "Та үнэгүй долоо хоногоо өөр шатанд ашигласан байна. Бүх долоо хоногийн хичээл, нэмэлт тоглоомыг нээхийн тулд багцаа сонгоно уу."
+          : "Эхний долоо хоногийн хичээл үнэгүй. Үлдсэн долоо хоногууд болон нэмэлт тоглоомыг нээхийн тулд багцаа сонгоно уу."}
+      </p>
+      <Link href="/billing" className="cta" style={{ marginTop: 12 }}>Багц сонгох</Link>
+    </div>
+  );
+}
+
+function UnitBlock({ u, weekIdx, p }: { u: UnitContent; weekIdx: number; p: Profile }) {
+  return (
+    <>
       {u.note && <div className="alert amber">{u.note}</div>}
       {u.lessons.map((l, i) => {
         const v = LIKES[p.likes[(weekIdx + i) % p.likes.length]] ?? LIKES.ball;
@@ -48,6 +70,17 @@ function UnitBlock({ u, weekIdx, p }: { u: Unit; weekIdx: number; p: Profile }) 
           </div>
         );
       })}
+      <div className="card">
+        <h3 className="round">Өдөр тутамд</h3>
+        <p className="muted">Тусгай цаг гаргахаас гадна өдрийн ажилдаа шингээвэл үр дүн нь хурдан гарна.</p>
+        <ul className="steps">{u.daily.map(s => <li key={s}>{s}</li>)}</ul>
+      </div>
+      <div className="card">
+        <h3 className="round">Зорилго биелсний шинж</h3>
+        <p className="muted">Эдгээрийн ихэнх нь ажиглагдвал дараагийн долоо хоног руу шилжинэ.</p>
+        <ul className="steps">{u.signs.map(s => <li key={s}>{s}</li>)}</ul>
+      </div>
+      <div className="alert amber"><b>Хэцүү байвал</b>{u.stuck}</div>
     </>
   );
 }
@@ -58,6 +91,8 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
   const [sel, setSel] = useState<{ adv: number; tab: number | "x" }>({ adv: plan.advance, tab: 0 });
   const [ai, setAi] = useState<{ key: string; games: Game[]; msg: string } | null>(null);
   const [aiBusy, setAiBusy] = useState(false);
+  /* Хичээлийн агуулгыг серверээс авна: төлбөргүй бол зөвхөн үнэгүй долоо хоногийнх ирнэ */
+  const [content, setContent] = useState<{ key: string; access: boolean; freeUsed: boolean; units: Record<number, UnitContent>; err: string } | null>(null);
   const tabsRef = useRef<HTMLDivElement>(null);
   const shownAdv = useRef(plan.advance);
 
@@ -66,6 +101,28 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
     shownAdv.current = plan.advance;
     tabsRef.current?.scrollIntoView({ block: "start" });
   }, [plan.advance]);
+
+  const contentKey = childId + ":" + plan.ids.join(",") + ":" + plan.extra + ":" + plan.seq[0];
+  useEffect(() => {
+    let off = false;
+    (async () => {
+      try {
+        const { data } = await getSupabase().auth.getSession();
+        const res = await fetch("/api/lessons", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: "Bearer " + (data.session?.access_token ?? "") },
+          body: JSON.stringify({ childId }),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error("load");
+        if (!off) setContent({ key: contentKey, access: json.access === true, freeUsed: json.freeUsed === true, units: json.units ?? {}, err: "" });
+      } catch {
+        if (!off) setContent({ key: contentKey, access: false, freeUsed: false, units: {}, err: "Хичээлийг ачаалж чадсангүй. Хуудсаа дахин ачаална уу." });
+      }
+    })();
+    return () => { off = true; };
+  }, [childId, contentKey]);
+  const loaded = content?.key === contentKey ? content : null;
 
   const who = p.name || (p.sex === "boy" ? "Таны хүү" : "Таны охин");
   const per = p.time === 10 ? 10 : p.time / 2;
@@ -145,7 +202,12 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
       </div>
 
       <div id="plan-panel" role="tabpanel" aria-labelledby={tabId(week)}>
-        <UnitBlock u={unit} weekIdx={week === "x" ? 0 : plan.advance + week} p={p} />
+        <UnitHead u={unit} />
+        {!loaded && <p className="muted">Хичээлийг ачаалж байна…</p>}
+        {loaded?.err && <p className="err" role="alert">{loaded.err}</p>}
+        {loaded && !loaded.err && (loaded.units[unitId]
+          ? <UnitBlock u={loaded.units[unitId]} weekIdx={week === "x" ? 0 : plan.advance + week} p={p} />
+          : <Paywall what="Энэ долоо хоногийн хичээл" freeUsed={loaded.freeUsed} />)}
 
         {week !== "x" && (
           <div className="card">
@@ -183,6 +245,13 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
       <div className="card">
         <h3 className="round">Нэмэлт тоглоом</h3>
         <p className="muted">Хүүхдийн тань мэдээлэлд тулгуурлан хиймэл оюунаар шинэ тоглоом зохиолгоно.</p>
+        {loaded && !loaded.access ? (
+          <>
+            <p className="muted" style={{ marginTop: 8 }}>Нэмэлт тоглоом төлбөртэй багцад багтана.</p>
+            <Link href="/billing" className="ghost" style={{ marginTop: 12 }}>Багц сонгох</Link>
+          </>
+        ) : (
+          <>
         <button className="ghost" onClick={makeGames} disabled={aiBusy}>
           {aiBusy ? "Зохиож байна…" : games.length ? "Өөр тоглоом зохиолгох" : "Шинэ тоглоом зохиолгох"}
         </button>
@@ -195,6 +264,8 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
           </div>
         ))}
         {games.length > 0 && <p className="muted" style={{ marginTop: 8 }}>Хиймэл оюунаар зохиосон тул хүүхэддээ тохирох эсэхийг өөрөө нягтлаарай.</p>}
+          </>
+        )}
       </div>
 
       <p className="foot">Энэ төлөвлөгөө онош биш, гэрийн дэмжлэг юм. Санаа зовоосон зүйл байвал хэл засалч, хүүхдийн эмчид хандаарай.</p>

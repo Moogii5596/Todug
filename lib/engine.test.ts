@@ -278,16 +278,4 @@ describe("fill", () => {
     expect(fill("a{zzz}b", car)).toBe("ab");
     expect(fill("Миний ээлж.", car)).toBe("Миний ээлж.");
   });
-  it("leaves no unresolved placeholder in any lesson for any like", () => {
-    for (const like of Object.values(LIKES)) {
-      for (const u of UNITS) for (const l of u.lessons) {
-        for (const s of [...l.steps, ...l.talk.map(t => t[1] ?? "")]) {
-          const out = fill(s, like);
-          expect(out).not.toMatch(/\{\w+\}/);
-          const keys = [...s.matchAll(/\{(\w+)\}/g)].map(x => x[1].charAt(0).toLowerCase() + x[1].slice(1));
-          for (const k of keys) expect(like).toHaveProperty(k);
-        }
-      }
-    }
-  });
 });

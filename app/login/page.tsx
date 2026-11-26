@@ -29,12 +29,18 @@ function isRate(e: AuthErr) {
 /** Supabase-ийн алдааг (code, эсвэл message) монгол мессеж болгоно */
 function explain(e: AuthErr, mode: Mode): string {
   const m = e.message ?? "";
+  // Supabase-ийн имэйл илгээх хязгаар (цагт цөөн тооны имэйл): оролдлогын тооноос өөр шалтгаан
+  if (e.code === "over_email_send_rate_limit" || /email rate limit/i.test(m))
+    return "Баталгаажуулах имэйл илгээх хязгаарт хүрлээ. 1 цагийн дараа дахин оролдоно уу.";
   if (isRate(e)) return RATE;
   if (mode === "up") {
     if (e.code === "user_already_exists" || e.code === "email_exists" || /already registered/i.test(m))
       return "Энэ имэйл бүртгэлтэй байна. Нэвтэрнэ үү.";
     if (e.code === "weak_password" || /password should be/i.test(m))
       return "Нууц үг хэт богино эсвэл амархан байна. Өөр нууц үг сонгоно уу.";
+    // Supabase дээр "Allow new users to sign up" эсвэл Email provider унтраалттай үед
+    if (e.code === "signup_disabled" || e.code === "email_provider_disabled" || /signups not allowed/i.test(m))
+      return "Одоогоор шинэ бүртгэл хаалттай байна. Удахгүй нээгдэнэ.";
     return "Бүртгэж чадсангүй. Дахин оролдоно уу.";
   }
   if (e.code === "email_not_confirmed" || /email not confirmed/i.test(m))
