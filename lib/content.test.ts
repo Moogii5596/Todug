@@ -16,6 +16,8 @@ describe("lesson content", () => {
       expect(u.strategy.name.length).toBeGreaterThan(3);
       expect(u.strategy.how.length).toBeGreaterThanOrEqual(2);
       expect(u.strategy.how.length).toBeLessThanOrEqual(3);
+      expect(u.avoid.length).toBeGreaterThanOrEqual(2);
+      expect(u.avoid.length).toBeLessThanOrEqual(3);
       expect(u.words.length).toBeGreaterThanOrEqual(3);
       expect(u.words.length).toBeLessThanOrEqual(6);
       expect(u.days).toHaveLength(7);
@@ -24,7 +26,7 @@ describe("lesson content", () => {
       expect(u.stuck.length).toBeGreaterThan(20);
       expect(u.refer.length).toBeGreaterThanOrEqual(1);
       /* Эдгээр нь дэлгэцэд fill()-гүйгээр гардаг тул орлуулагч агуулж болохгүй */
-      for (const t of [u.note ?? "", u.why, u.strategy.name, ...u.strategy.how, u.cheer, ...u.signs, u.stuck, ...u.refer])
+      for (const t of [u.note ?? "", u.why, u.strategy.name, ...u.strategy.how, ...u.avoid, u.cheer, ...u.signs, u.stuck, ...u.refer])
         expect(t).not.toMatch(/[{}]/);
     }
   });
@@ -32,9 +34,15 @@ describe("lesson content", () => {
     for (const u of CONTENT) {
       for (const d of u.days) {
         expect(ROUTINES).toHaveProperty(d.routine);
-        expect(d.todo.length).toBeGreaterThan(20);
+        /* Өдөр бүр бүрэн хичээл: нэр, хэрэгтэй зүйл, гурван алхам, хүүхдийн хариунд тохирох хоёр зөвлөгөө */
+        expect(d.title.length).toBeGreaterThan(3);
+        expect(d.need.length).toBeGreaterThan(3);
+        expect(d.steps).toHaveLength(3);
+        for (const s of d.steps) expect(s.length).toBeGreaterThan(20);
+        expect(d.ifs).toHaveLength(2);
+        for (const f of d.ifs) { expect(f.when.length).toBeGreaterThan(8); expect(f.then.length).toBeGreaterThan(15); }
         expect(d.talk.length).toBeGreaterThanOrEqual(2);
-        expect(d.talk.length).toBeLessThanOrEqual(4);
+        expect(d.talk.length).toBeLessThanOrEqual(5);
         for (const t of d.talk) {
           expect(["p", "c", "a", "w"]).toContain(t[0]);
           expect(t).toHaveLength(t[0] === "w" ? 1 : 2);
@@ -45,12 +53,13 @@ describe("lesson content", () => {
         for (const line of parent) expect(line).not.toMatch(/хэл дээ|гэж хэл|дахиад хэл|зөв хэл/i);
       }
       expect(new Set(u.days.map(d => d.routine)).size).toBeGreaterThanOrEqual(4);
+      expect(new Set(u.days.map(d => d.title)).size).toBe(7);
     }
   });
   it("leaves no unresolved placeholder in any word, task or dialogue for any like", () => {
     for (const like of Object.values(LIKES)) {
       for (const u of CONTENT) {
-        for (const s of [...u.words, ...u.days.flatMap(d => [d.todo, ...d.talk.map(t => t[1] ?? "")])]) {
+        for (const s of [...u.words, ...u.days.flatMap(d => [d.title, d.need, ...d.steps, ...d.talk.map(t => t[1] ?? ""), ...d.ifs.flatMap(f => [f.when, f.then])])]) {
           const out = fill(s, like);
           expect(out).not.toMatch(/[{}]/);
           const keys = [...s.matchAll(/\{(\w+)\}/g)].map(x => x[1].charAt(0).toLowerCase() + x[1].slice(1));
