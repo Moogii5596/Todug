@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildPlan, fill, STAGES, UNITS, LIKES, type Profile } from "./engine";
+import { buildPlan, fill, normWord, suggestNext, weekRecap, STAGES, UNITS, LIKES, type Profile } from "./engine";
 
 const RED_SLP = "Хэл засалчид үзүүлээрэй";
 const AMBER_WATCH = "Ахицыг нь ажиглаарай";
@@ -277,5 +277,31 @@ describe("fill", () => {
   it("unknown placeholders become empty, plain text is untouched", () => {
     expect(fill("a{zzz}b", car)).toBe("ab");
     expect(fill("Миний ээлж.", car)).toBe("Миний ээлж.");
+  });
+});
+
+describe("tracking helpers", () => {
+  it("weekRecap compares done days with the parent's own goal", () => {
+    expect(weekRecap(5, 4)).toEqual({ done: 5, goal: 4, met: true });
+    expect(weekRecap(3, 4)).toEqual({ done: 3, goal: 4, met: false });
+    expect(weekRecap(4, 4).met).toBe(true);
+  });
+  it("weekRecap has no verdict without a goal and clamps odd input", () => {
+    expect(weekRecap(2, null)).toEqual({ done: 2, goal: null, met: null });
+    expect(weekRecap(12, 9)).toEqual({ done: 7, goal: 7, met: true });
+    expect(weekRecap(-1, 0)).toEqual({ done: 0, goal: 1, met: false });
+    expect(weekRecap(NaN, NaN)).toEqual({ done: 0, goal: null, met: null });
+  });
+  it("suggestNext advances only when more than half of the signs are seen", () => {
+    expect(suggestNext(2, 3)).toBe("advance");
+    expect(suggestNext(1, 3)).toBe("repeat");
+    expect(suggestNext(2, 4)).toBe("repeat");
+    expect(suggestNext(3, 4)).toBe("advance");
+    expect(suggestNext(0, 0)).toBe("repeat");
+  });
+  it("normWord trims, lowercases, collapses spaces and caps the length", () => {
+    expect(normWord("  Дахиад   Ус ")).toBe("дахиад ус");
+    expect(normWord("   ")).toBe("");
+    expect(normWord("а".repeat(40))).toHaveLength(30);
   });
 });

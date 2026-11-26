@@ -4,13 +4,16 @@ import Link from "next/link";
 import { LIKES, ROUTINES, STAGES, UNITS, buildPlan, fill, type Like, type Profile, type Unit, type UnitContent } from "@/lib/engine";
 import { ageText } from "@/lib/children";
 import { getSupabase } from "@/lib/supabase";
+import SignCheck from "@/components/SignCheck";
+import WeekGoal from "@/components/WeekGoal";
+import WordLog from "@/components/WordLog";
 
 type Game = { name: string; steps: string[]; say?: string };
 type Props = {
   profile: Profile; childId: string;
   done: Record<number, number[]>;   /* түлхүүр нь UNITS-ийн индекс */
   onToggle: (unit: number, day: number) => void;
-  onAdvance: (delta: 4 | -4) => void;
+  onAdvance: (delta: number) => void;
   onResetUnit: (unit: number) => void;
 };
 
@@ -56,13 +59,13 @@ function Paywall({ what, freeUsed }: { what: string; freeUsed: boolean }) {
 }
 
 type BlockProps = {
-  u: UnitContent; unitId: number; weekIdx: number; p: Profile;
-  weekDone: number[]; trackable: boolean;
+  u: UnitContent; unitId: number; weekIdx: number; p: Profile; childId: string; access: boolean;
+  weekDone: number[]; trackable: boolean; onNext?: () => void;
   onToggle: (unit: number, day: number) => void; onResetUnit: (unit: number) => void;
 };
 
 /* Долоо хоногийн нэг арга ба 7 өдрийн хувилбар. Өдрийн товч нь тухайн өдрийн картыг нээнэ. */
-function UnitBlock({ u, unitId, weekIdx, p, weekDone, trackable, onToggle, onResetUnit }: BlockProps) {
+function UnitBlock({ u, unitId, weekIdx, p, childId, access, weekDone, trackable, onNext, onToggle, onResetUnit }: BlockProps) {
   const [picked, setPicked] = useState<number | null>(null);
   /* Сонгоогүй бол эхний хийгээгүй өдөр нээгдэнэ */
   const day = picked ?? ([1, 2, 3, 4, 5, 6, 7].find(d => !weekDone.includes(d)) ?? 7);
@@ -87,6 +90,7 @@ function UnitBlock({ u, unitId, weekIdx, p, weekDone, trackable, onToggle, onRes
         <p className="muted">
           {trackable ? weekDone.length + " / 7 өдөр хийсэн. " : ""}Нэг аргаа өдөр бүр өөр хэвшил дотор давтана. Өдрөө сонгоно уу.
         </p>
+        {trackable && <WeekGoal childId={childId} unitId={unitId} done={weekDone.length} access={access} />}
         <div className="days">
           {[1, 2, 3, 4, 5, 6, 7].map(d => (
             <button key={d} aria-pressed={weekDone.includes(d)} aria-current={d === day ? "true" : undefined}
@@ -109,11 +113,7 @@ function UnitBlock({ u, unitId, weekIdx, p, weekDone, trackable, onToggle, onRes
       </div>
 
       <div className="alert green"><b>Урам</b>{u.cheer}</div>
-      <div className="card">
-        <h3 className="round">Зорилго биелсний шинж</h3>
-        <p className="muted">Эдгээрийн ихэнх нь ажиглагдвал дараагийн долоо хоног руу шилжинэ. Үгүй бол энэ долоо хоногоо давтана.</p>
-        <ul className="steps">{u.signs.map(s => <li key={s}>{s}</li>)}</ul>
-      </div>
+      <SignCheck childId={childId} unitId={unitId} signs={u.signs} onNext={onNext} />
       <div className="alert amber"><b>Хэцүү байвал</b>{u.stuck}</div>
       <div className="card">
         <h3 className="round">Мэргэжилтэнд хандах үе</h3>
@@ -235,10 +235,14 @@ export default function PlanView({ profile: p, childId, done, onToggle, onAdvanc
         {loaded?.err && <p className="err" role="alert">{loaded.err}</p>}
         {loaded && !loaded.err && (loaded.units[unitId]
           ? <UnitBlock key={unitId} u={loaded.units[unitId]} unitId={unitId} weekIdx={week === "x" ? 0 : plan.advance + week} p={p}
-              weekDone={weekDone} trackable={week !== "x"} onToggle={onToggle} onResetUnit={onResetUnit} />
+              childId={childId} access={loaded.access}
+              weekDone={weekDone} trackable={week !== "x"} onToggle={onToggle} onResetUnit={onResetUnit}
+              onNext={week === 0 && plan.advance + 1 < plan.seq.length ? () => onAdvance(1) : undefined} />
           : <Paywall what="Энэ долоо хоногийн хичээл" freeUsed={loaded.freeUsed} />)}
 
       </div>
+
+      <WordLog childId={childId} />
 
       <div className="card">
         <h3 className="round">Цааш үргэлжлүүлэх</h3>

@@ -144,6 +144,22 @@ export function unlockedIds(plan: Plan, access: boolean): number[] {
   return access ? all : all.filter(id => id === plan.seq[0]);
 }
 
+/* ============ Ахиц хянах ============ */
+/* Долоо хоногийн тайлан: зорилго тавиагүй бол met нь null */
+export function weekRecap(done: number, goal: number | null) {
+  const d = Math.min(Math.max(Math.floor(done) || 0, 0), 7);
+  const g = goal == null || !Number.isFinite(goal) ? null : Math.min(Math.max(Math.floor(goal), 1), 7);
+  return { done: d, goal: g, met: g == null ? null : d >= g };
+}
+/* "Зорилго биелсний шинж"-ийн талаас илүү нь ажиглагдвал дараагийн шат, үгүй бол давтана */
+export function suggestNext(checked: number, total: number): "advance" | "repeat" {
+  return total > 0 && checked * 2 > total ? "advance" : "repeat";
+}
+/* Үгийн бүртгэлд хадгалах хэлбэр: захын зай авч, жижиг үсэг болгож, 30 тэмдэгтээр хязгаарлана */
+export function normWord(w: string) {
+  return w.trim().replace(/\s+/g, " ").toLowerCase().slice(0, 30).trim();
+}
+
 function cap(s: string) { return s.charAt(0).toUpperCase() + s.slice(1); }
 export function fill(str: string, v: Like) {
   return str.replace(/\{(\w+)\}/g, (_: string, k: string) => {

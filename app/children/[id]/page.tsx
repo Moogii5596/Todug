@@ -65,7 +65,7 @@ export default function Child() {
     setErr("");
   }
 
-  async function advance(delta: 4 | -4) {
+  async function advance(delta: number) {
     if (!profile || moving) return;
     const next = Math.max(0, buildPlan(profile).advance + delta);
     setMoving(true);
